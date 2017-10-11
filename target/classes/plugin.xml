@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin>
+    <extension point="com.change_vision.astah.ui.actionSets">
+        <actionSet
+                label="%action_set_label"
+                visible="true"
+                id="pathfinder.pathfinder.actionSet">
+            <menu
+                    id="pathfinder"
+                    label="%menu_group"
+                    path="tool/pathfinder">
+            </menu>
+            <action
+                    label="%count_classes"
+                    icon="icons/sample.gif"
+                    class="me.maartendev.APIForEditingModelsSample"
+                    tooltip="%menu_tooltip"
+                    menubarPath="tool/pathfinder/"
+                    id="pathfinder">
+            </action>
+        </actionSet>
+    </extension>
+</plugin>
