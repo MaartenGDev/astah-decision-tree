@@ -24,7 +24,12 @@ import com.change_vision.jude.api.inf.ui.IWindow;
  * Or, models in the structure tree in Astah can be dragged to a diagram.
  */
 
-public class APIForEditingModelsSample implements IPluginActionDelegate {
+public class PathFinder implements IPluginActionDelegate {
+    private ActivityTypeChecker typeChecker;
+
+    public PathFinder() {
+        typeChecker = new ActivityTypeChecker();
+    }
 
     public Object run(IWindow window) {
         try {
@@ -32,18 +37,20 @@ public class APIForEditingModelsSample implements IPluginActionDelegate {
 
             ProjectAccessor project = AstahAPI.getAstahAPI().getProjectAccessor();
 
-            ActivityDiagramEditor test = project.getDiagramEditorFactory().getActivityDiagramEditor();
+            ActivityDiagramEditor diagramEditor = project.getDiagramEditorFactory().getActivityDiagramEditor();
+            diagramEditor.setDiagram(project.getProject().getDiagrams()[0]);
 
-            test.setDiagram(project.getProject().getDiagrams()[0]);
-
-            IActivityDiagram activityDiagram = (IActivityDiagram) test.getDiagram();
-
-            IActivity activity = activityDiagram.getActivity();
+            IActivity activity = ((IActivityDiagram) diagramEditor.getDiagram()).getActivity();
 
             for (IActivityNode node : activity.getActivityNodes()) {
-                System.out.println(node.getName() + " is connected with a decision node: " + (isConnectedToDecisionNode(node) ? "yes" : "no"));
-            }
+                if(typeChecker.isInitialNode(node)){
+                    boolean initialNodeIsConnectedToDecisionNode = isConnectedToNodeOfType(node, typeChecker.getDecisionNodeType());
+                    boolean initialNodeIsConnectedToEndNode = isConnectedToNodeOfType(node, typeChecker.getEndNodeType());
 
+                    System.out.println("Is initial node connected to decision node: " + initialNodeIsConnectedToDecisionNode);
+                    System.out.println("Is initial node connected to end node: " + initialNodeIsConnectedToEndNode);
+                }
+            }
 
         } catch (Throwable e) {
             e.printStackTrace();
@@ -52,21 +59,16 @@ public class APIForEditingModelsSample implements IPluginActionDelegate {
         return null;
     }
 
-    private boolean isConnectedToDecisionNode(IActivityNode node) throws InvalidUsingException {
+    private boolean isConnectedToNodeOfType(IActivityNode node, String type) throws InvalidUsingException {
         for (IFlow flow : node.getOutgoings()) {
-            if (isDecisionNode(flow.getTarget())) {
+            if (typeChecker.getTargetType(flow.getTarget()).equals(type)) {
                 return true;
             } else if (flow.getTarget().getOutgoings().length > 0) {
-                return isConnectedToDecisionNode(flow.getTarget());
+                return isConnectedToNodeOfType(flow.getTarget(), type);
             }
         }
 
         return false;
     }
-
-    private boolean isDecisionNode(IActivityNode node) throws InvalidUsingException {
-        return node.getPresentations()[0].getType().equals("Decision Node & Merge Node");
-    }
-
 }
 

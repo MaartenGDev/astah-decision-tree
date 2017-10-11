@@ -13,7 +13,7 @@
             <action
                     label="%count_classes"
                     icon="icons/sample.gif"
-                    class="me.maartendev.APIForEditingModelsSample"
+                    class="me.maartendev.PathFinder"
                     tooltip="%menu_tooltip"
                     menubarPath="tool/pathfinder/"
                     id="pathfinder">
