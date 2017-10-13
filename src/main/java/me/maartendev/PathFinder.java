@@ -2,17 +2,20 @@ package me.maartendev;
 
 
 import com.change_vision.jude.api.inf.editor.ActivityDiagramEditor;
+import com.change_vision.jude.api.inf.editor.DiagramEditor;
+import com.change_vision.jude.api.inf.editor.TransactionManager;
 import com.change_vision.jude.api.inf.exception.*;
 import com.change_vision.jude.api.inf.model.*;
+import com.change_vision.jude.api.inf.presentation.INodePresentation;
 import com.change_vision.jude.api.inf.project.ProjectAccessor;
 import com.change_vision.jude.api.inf.AstahAPI;
 import com.change_vision.jude.api.inf.ui.IPluginActionDelegate;
 import com.change_vision.jude.api.inf.ui.IWindow;
 
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 
 
 /**
@@ -46,7 +49,6 @@ public class PathFinder implements IPluginActionDelegate {
             List<NodeConnection> decisionToFinalNodes = new ArrayList<>();
             List<NodeConnection> initialToFinalNodes = new ArrayList<>();
 
-
             for (IActivityNode node : activity.getActivityNodes()) {
                 ActivityNodeTypes nodeType = typeConverter.toEnum(node);
 
@@ -59,6 +61,8 @@ public class PathFinder implements IPluginActionDelegate {
                     decisionToFinalNodes.addAll(getDirectlyConnectedToNodeOfTypeCount(node, node, ActivityNodeTypes.FINAL_NODE, new ArrayList<>()));
                 }
             }
+
+
             System.out.println("Initial -> Decision node: " + initialToDecisionNodes.size());
             System.out.println("Decision -> Decision node: " + decisionToDecisionNodes.size());
             System.out.println("Decision -> Activity final node " + decisionToFinalNodes.size());
@@ -73,11 +77,16 @@ public class PathFinder implements IPluginActionDelegate {
             allConnections.addAll(decisionToFinalNodes);
             allConnections.addAll(initialToFinalNodes);
 
-            NodeConnection initialNodeConnection = allConnections.stream().filter(x -> x.sourceActivityType == ActivityNodeTypes.INITIAL_NODE).findFirst().get();
-            NodeConnection finalNodeConnection = allConnections.stream().filter(x -> x.destinationActivityType == ActivityNodeTypes.FINAL_NODE).findFirst().get();
+            NodeConnection initialNodeConnection = allConnections.stream().filter(x -> x.source.type == ActivityNodeTypes.INITIAL_NODE).findFirst().orElseGet(null);
+            NodeConnection finalNodeConnection = allConnections.stream().filter(x -> x.destination.type == ActivityNodeTypes.FINAL_NODE).findFirst().orElseGet(null);
 
+            // List<NodeConnection> myPath = getPathBetweenNodes(initialNodeConnection, finalNodeConnection, allConnections, new ArrayList<>());
 
-            List<NodeConnection> myPath = getPathBetweenNodes(initialNodeConnection, finalNodeConnection, allConnections);
+            for (NodeConnection connection : allConnections) {
+                System.out.println(connection.source.type + " -> " + connection.destination.type);
+            }
+
+            drawPathNumbers(diagramEditor, allConnections);
 
         } catch (Throwable e) {
             e.printStackTrace();
@@ -92,12 +101,7 @@ public class PathFinder implements IPluginActionDelegate {
             ActivityNodeTypes targetType = typeConverter.toEnum(target);
 
             if (targetType == typeToFind) {
-                NodeConnection connection = new NodeConnection();
-
-                connection.sourceId = initialNode.getId();
-                connection.destinationId = target.getId();
-                connection.sourceActivityType = typeConverter.toEnum(initialNode);
-                connection.destinationActivityType = typeConverter.toEnum(target);
+                NodeConnection connection = new NodeConnection(new ActivityNode(initialNode), new ActivityNode(target));
 
                 connections.add(connection);
             } else if (typeToFind != ActivityNodeTypes.DECISION_NODE && targetType == ActivityNodeTypes.DECISION_NODE) {
@@ -110,18 +114,39 @@ public class PathFinder implements IPluginActionDelegate {
         return connections;
     }
 
-    private List<NodeConnection> getPathBetweenNodes(NodeConnection start, NodeConnection end, List<NodeConnection> connections) {
+    private List<NodeConnection> getPathBetweenNodes(NodeConnection start, NodeConnection end, List<NodeConnection> initialConnections, List<NodeConnection> connections) {
 
-        NodeConnection targetConnection = connections.stream().filter(x -> x.sourceId.equals(start.destinationId)).findFirst().get();
+        NodeConnection targetConnection = initialConnections.stream().filter(x -> x.source.id.equals(start.source.id)).findFirst().get();
+
+        if (connections.size() == 0) {
+            connections.add(start);
+        }
 
         connections.add(targetConnection);
 
-        if (targetConnection.destinationActivityType == end.destinationActivityType) {
+        if (targetConnection.destination.type == end.destination.type) {
             return connections;
         }
 
 
-        return getPathBetweenNodes(targetConnection, end, connections);
+        return getPathBetweenNodes(targetConnection, end, initialConnections, connections);
+    }
+
+    private void drawPathNumbers(ActivityDiagramEditor diagramEditor, List<NodeConnection> connections) throws InvalidEditingException {
+        TransactionManager.beginTransaction();
+
+        int connectionId = 1;
+
+        for (NodeConnection connection : connections) {
+            Rectangle2D sourceNodeLocation = connection.source.location;
+            Rectangle2D destinationNodeLocation = connection.destination.location;
+
+            diagramEditor.createConnector(String.valueOf(connectionId), new Point2D.Double( sourceNodeLocation.getX(),  destinationNodeLocation.getY() - sourceNodeLocation.getY()));
+
+            connectionId++;
+        }
+
+        TransactionManager.endTransaction();
     }
 }
 

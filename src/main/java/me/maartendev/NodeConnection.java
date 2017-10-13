@@ -1,8 +1,11 @@
 package me.maartendev;
 
 public class NodeConnection {
-    public String sourceId;
-    public String destinationId;
-    public ActivityNodeTypes sourceActivityType;
-    public ActivityNodeTypes destinationActivityType;
+    public ActivityNode source;
+    public ActivityNode destination;
+
+    public NodeConnection(ActivityNode source, ActivityNode end){
+        this.source = source;
+        this.destination = end;
+    }
 }
