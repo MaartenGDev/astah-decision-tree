@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Astah-Edition: all
 Astah-Version: 6.7
-Bnd-LastModified: 1507901869848
+Bnd-LastModified: 1507931789396
 Build-Jdk: 1.8.0_144
 Built-By: maarten
 Bundle-Activator: me.maartendev.Activator

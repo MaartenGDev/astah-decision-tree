@@ -13,18 +13,9 @@ import com.change_vision.jude.api.inf.ui.IPluginActionDelegate;
 import com.change_vision.jude.api.inf.ui.IWindow;
 
 import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 
-
-/**
- * Sample source codes for creating Astah model by Astah API.
- * Crate a package and two classes, then add an association between classes.
- * A class diagram is not generated in this sample.
- * To create a class diagram, please use [Auto caret class diagram] function in Astah.
- * Or, models in the structure tree in Astah can be dragged to a diagram.
- */
 
 public class PathFinder implements IPluginActionDelegate {
     private ActivityNodeTypeConverter typeConverter;
@@ -135,13 +126,38 @@ public class PathFinder implements IPluginActionDelegate {
     private void drawPathNumbers(ActivityDiagramEditor diagramEditor, List<NodeConnection> connections) throws InvalidEditingException {
         TransactionManager.beginTransaction();
 
+        int connectionLabelOffset = 20;
         int connectionId = 1;
 
         for (NodeConnection connection : connections) {
-            Rectangle2D sourceNodeLocation = connection.source.location;
-            Rectangle2D destinationNodeLocation = connection.destination.location;
+            double connectionSourceY = connection.source.location.getY();
+            double connectionDestinationY = connection.destination.location.getY();
 
-            diagramEditor.createConnector(String.valueOf(connectionId), new Point2D.Double( sourceNodeLocation.getX(),  destinationNodeLocation.getY() - sourceNodeLocation.getY()));
+            double connectionSourceX = connection.source.location.getX();
+            double connectionDestinationX = connection.destination.location.getX();
+
+            double yClosestToTop = Math.min(connectionSourceY, connectionDestinationY);
+            double yClosestToBottom = Math.max(connectionSourceY, connectionDestinationY);
+
+            double xClosestToLeft = Math.min(connectionSourceX, connectionDestinationX);
+            double xClosestToRight = Math.max(connectionSourceX, connectionDestinationX);
+
+            double yDifference = yClosestToBottom - yClosestToTop;
+            double yPosition = yClosestToTop + (yDifference / 2);
+
+            double xDifference = xClosestToRight - xClosestToLeft;
+            double xPosition = xClosestToLeft + (xDifference / 2);
+
+            boolean isHorizontalLine = connectionSourceY == connectionDestinationY;
+
+            if (isHorizontalLine) {
+                yPosition -= connectionLabelOffset;
+            } else {
+                xPosition += connectionLabelOffset;
+            }
+
+
+            diagramEditor.createConnector(String.valueOf(connectionId), new Point2D.Double(xPosition, yPosition));
 
             connectionId++;
         }
