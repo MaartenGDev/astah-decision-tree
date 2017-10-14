@@ -19,9 +19,11 @@ import java.util.List;
 
 public class PathFinder implements IPluginActionDelegate {
     private ActivityNodeTypeConverter typeConverter;
+    private PathVisualizer pathVisualizer;
 
     public PathFinder() {
         typeConverter = new ActivityNodeTypeConverter();
+        pathVisualizer = new PathVisualizer();
     }
 
     public Object run(IWindow window) {
@@ -77,8 +79,7 @@ public class PathFinder implements IPluginActionDelegate {
                 System.out.println(connection.source.type + " -> " + connection.destination.type);
             }
 
-            drawPathNumbers(diagramEditor, allConnections);
-
+            pathVisualizer.drawPathNumbers(diagramEditor, allConnections);
         } catch (Throwable e) {
             e.printStackTrace();
         }
@@ -121,48 +122,6 @@ public class PathFinder implements IPluginActionDelegate {
 
 
         return getPathBetweenNodes(targetConnection, end, initialConnections, connections);
-    }
-
-    private void drawPathNumbers(ActivityDiagramEditor diagramEditor, List<NodeConnection> connections) throws InvalidEditingException {
-        TransactionManager.beginTransaction();
-
-        int connectionLabelOffset = 20;
-        int connectionId = 1;
-
-        for (NodeConnection connection : connections) {
-            double connectionSourceY = connection.source.location.getY();
-            double connectionDestinationY = connection.destination.location.getY();
-
-            double connectionSourceX = connection.source.location.getX();
-            double connectionDestinationX = connection.destination.location.getX();
-
-            double yClosestToTop = Math.min(connectionSourceY, connectionDestinationY);
-            double yClosestToBottom = Math.max(connectionSourceY, connectionDestinationY);
-
-            double xClosestToLeft = Math.min(connectionSourceX, connectionDestinationX);
-            double xClosestToRight = Math.max(connectionSourceX, connectionDestinationX);
-
-            double yDifference = yClosestToBottom - yClosestToTop;
-            double yPosition = yClosestToTop + (yDifference / 2);
-
-            double xDifference = xClosestToRight - xClosestToLeft;
-            double xPosition = xClosestToLeft + (xDifference / 2);
-
-            boolean isHorizontalLine = connectionSourceY == connectionDestinationY;
-
-            if (isHorizontalLine) {
-                yPosition -= connectionLabelOffset;
-            } else {
-                xPosition += connectionLabelOffset;
-            }
-
-
-            diagramEditor.createConnector(String.valueOf(connectionId), new Point2D.Double(xPosition, yPosition));
-
-            connectionId++;
-        }
-
-        TransactionManager.endTransaction();
     }
 }
 

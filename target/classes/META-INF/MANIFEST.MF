@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Astah-Edition: all
 Astah-Version: 6.7
-Bnd-LastModified: 1507931789396
+Bnd-LastModified: 1507993668478
 Build-Jdk: 1.8.0_144
 Built-By: maarten
 Bundle-Activator: me.maartendev.Activator
@@ -14,9 +14,9 @@ Created-By: Apache Maven Bundle Plugin
 Embed-Dependency: *;scope=compile|runtime;type=!pom
 Embed-Transitive: true
 Export-Package: me.maartendev;version="1.0.0.SNAPSHOT";uses:="com.change
- _vision.jude.api.inf.exception,com.change_vision.jude.api.inf.model,com
- .change_vision.jude.api.inf.project,com.change_vision.jude.api.inf.ui,j
- avax.swing,org.osgi.framework"
+ _vision.jude.api.inf.editor,com.change_vision.jude.api.inf.exception,co
+ m.change_vision.jude.api.inf.model,com.change_vision.jude.api.inf.proje
+ ct,com.change_vision.jude.api.inf.ui,javax.swing,org.osgi.framework"
 Import-Package: com.change_vision.jude.api.inf;resolution:=optional,com.
  change_vision.jude.api.inf.editor;resolution:=optional,com.change_visio
  n.jude.api.inf.exception;resolution:=optional,com.change_vision.jude.ap
