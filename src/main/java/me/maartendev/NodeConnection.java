@@ -1,5 +1,7 @@
 package me.maartendev;
 
+import java.util.List;
+
 public class NodeConnection {
     public ActivityNode source;
     public ActivityNode destination;

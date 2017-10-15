@@ -14,6 +14,7 @@ import com.change_vision.jude.api.inf.ui.IWindow;
 
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -37,21 +38,21 @@ public class PathFinder implements IPluginActionDelegate {
 
             IActivity activity = ((IActivityDiagram) diagramEditor.getDiagram()).getActivity();
 
-            List<NodeConnection> initialToDecisionNodes = new ArrayList<>();
-            List<NodeConnection> decisionToDecisionNodes = new ArrayList<>();
-            List<NodeConnection> decisionToFinalNodes = new ArrayList<>();
-            List<NodeConnection> initialToFinalNodes = new ArrayList<>();
+            List<NodeRoute> initialToDecisionNodes = new ArrayList<>();
+            List<NodeRoute> decisionToDecisionNodes = new ArrayList<>();
+            List<NodeRoute> decisionToFinalNodes = new ArrayList<>();
+            List<NodeRoute> initialToFinalNodes = new ArrayList<>();
 
             for (IActivityNode node : activity.getActivityNodes()) {
                 ActivityNodeTypes nodeType = typeConverter.toEnum(node);
 
                 if (nodeType == ActivityNodeTypes.INITIAL_NODE) {
-                    initialToDecisionNodes.addAll(getDirectlyConnectedToNodeOfTypeCount(node, node, ActivityNodeTypes.DECISION_NODE, new ArrayList<>()));
-                    initialToFinalNodes.addAll(getDirectlyConnectedToNodeOfTypeCount(node, node, ActivityNodeTypes.FINAL_NODE, new ArrayList<>()));
+                    initialToDecisionNodes.addAll(getDirectlyConnectedToNodeOfTypeCount(node, ActivityNodeTypes.DECISION_NODE, new ArrayList<>(), new ArrayList<>(), true));
+                    initialToFinalNodes.addAll(getDirectlyConnectedToNodeOfTypeCount(node, ActivityNodeTypes.FINAL_NODE, new ArrayList<>(), new ArrayList<>(), true));
 
                 } else if (nodeType == ActivityNodeTypes.DECISION_NODE) {
-                    decisionToDecisionNodes.addAll(getDirectlyConnectedToNodeOfTypeCount(node, node, ActivityNodeTypes.DECISION_NODE, new ArrayList<>()));
-                    decisionToFinalNodes.addAll(getDirectlyConnectedToNodeOfTypeCount(node, node, ActivityNodeTypes.FINAL_NODE, new ArrayList<>()));
+                    decisionToDecisionNodes.addAll(getDirectlyConnectedToNodeOfTypeCount(node, ActivityNodeTypes.DECISION_NODE, new ArrayList<>(), new ArrayList<>(), true));
+                    decisionToFinalNodes.addAll(getDirectlyConnectedToNodeOfTypeCount(node, ActivityNodeTypes.FINAL_NODE, new ArrayList<>(), new ArrayList<>(), true));
                 }
             }
 
@@ -64,18 +65,18 @@ public class PathFinder implements IPluginActionDelegate {
             System.out.println("Total paths: " + (initialToDecisionNodes.size() + decisionToDecisionNodes.size() + decisionToFinalNodes.size() + initialToFinalNodes.size()));
 
 
-            List<NodeConnection> allConnections = new ArrayList<>();
+            List<NodeRoute> allConnections = new ArrayList<>();
             allConnections.addAll(initialToDecisionNodes);
             allConnections.addAll(decisionToDecisionNodes);
             allConnections.addAll(decisionToFinalNodes);
             allConnections.addAll(initialToFinalNodes);
 
-            NodeConnection initialNodeConnection = allConnections.stream().filter(x -> x.source.type == ActivityNodeTypes.INITIAL_NODE).findFirst().orElseGet(null);
-            NodeConnection finalNodeConnection = allConnections.stream().filter(x -> x.destination.type == ActivityNodeTypes.FINAL_NODE).findFirst().orElseGet(null);
+            NodeRoute initialNodeConnection = allConnections.stream().filter(x -> x.source.type == ActivityNodeTypes.INITIAL_NODE).findFirst().orElseGet(null);
+            NodeRoute finalNodeConnection = allConnections.stream().filter(x -> x.destination.type == ActivityNodeTypes.FINAL_NODE).findFirst().orElseGet(null);
 
             // List<NodeConnection> myPath = getPathBetweenNodes(initialNodeConnection, finalNodeConnection, allConnections, new ArrayList<>());
 
-            for (NodeConnection connection : allConnections) {
+            for (NodeRoute connection : allConnections) {
                 System.out.println(connection.source.type + " -> " + connection.destination.type);
             }
 
@@ -87,23 +88,27 @@ public class PathFinder implements IPluginActionDelegate {
         return null;
     }
 
-    private List<NodeConnection> getDirectlyConnectedToNodeOfTypeCount(IActivityNode initialNode, IActivityNode node, ActivityNodeTypes typeToFind, List<NodeConnection> connections) throws InvalidUsingException {
+    private List<NodeRoute> getDirectlyConnectedToNodeOfTypeCount(IActivityNode node, ActivityNodeTypes typeToFind, List<NodeConnection> route, List<NodeRoute> nodeRoutes, boolean isRootNode) throws InvalidUsingException {
         for (IFlow flow : node.getOutgoings()) {
             IActivityNode target = flow.getTarget();
             ActivityNodeTypes targetType = typeConverter.toEnum(target);
 
-            if (targetType == typeToFind) {
-                NodeConnection connection = new NodeConnection(new ActivityNode(initialNode), new ActivityNode(target));
+            if(isRootNode){
+                route = new ArrayList<>();
+            }
 
-                connections.add(connection);
+            route.add(new NodeConnection(new ActivityNode(node), new ActivityNode(target)));
+
+            if (targetType == typeToFind) {
+                nodeRoutes.add(new NodeRoute(route.get(0).source, route.get(route.size() - 1).destination, route));
             } else if (typeToFind != ActivityNodeTypes.DECISION_NODE && targetType == ActivityNodeTypes.DECISION_NODE) {
-                return connections;
+                return nodeRoutes;
             } else if (target.getOutgoings().length > 0) {
-                connections = getDirectlyConnectedToNodeOfTypeCount(initialNode, target, typeToFind, connections);
+                nodeRoutes = getDirectlyConnectedToNodeOfTypeCount(target, typeToFind, route, nodeRoutes, false);
             }
         }
 
-        return connections;
+        return nodeRoutes;
     }
 
     private List<NodeConnection> getPathBetweenNodes(NodeConnection start, NodeConnection end, List<NodeConnection> initialConnections, List<NodeConnection> connections) {

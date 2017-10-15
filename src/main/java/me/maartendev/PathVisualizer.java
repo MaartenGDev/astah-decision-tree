@@ -11,16 +11,14 @@ public class PathVisualizer {
     private final int ACTIVITY_ID_INDICATOR_WIDTH = 20;
     private final int ACTIVITY_ID_INDICATOR_RADIUS = ACTIVITY_ID_INDICATOR_WIDTH / 2;
 
-    public void drawPathNumbers(ActivityDiagramEditor diagramEditor, List<NodeConnection> connections) throws InvalidEditingException {
+    public void drawPathNumbers(ActivityDiagramEditor diagramEditor, List<NodeRoute> connections) throws InvalidEditingException {
         TransactionManager.beginTransaction();
 
         int connectionLabelOffset = ACTIVITY_ID_INDICATOR_RADIUS + 10;
         int connectionId = 1;
 
-        for (NodeConnection connection : connections) {
+        for (NodeRoute connection : connections) {
             double connectionSourceY = connection.source.location.getY();
-            System.out.println(connection.source.location.getWidth());
-            System.out.println(connection.source.type);
 
             double connectionDestinationY = connection.destination.location.getY();
 
