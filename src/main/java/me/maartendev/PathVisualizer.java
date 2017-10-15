@@ -3,7 +3,9 @@ package me.maartendev;
 import com.change_vision.jude.api.inf.editor.ActivityDiagramEditor;
 import com.change_vision.jude.api.inf.editor.TransactionManager;
 import com.change_vision.jude.api.inf.exception.InvalidEditingException;
+import com.change_vision.jude.api.inf.presentation.IPresentation;
 
+import java.awt.*;
 import java.awt.geom.Point2D;
 import java.util.List;
 
@@ -53,4 +55,36 @@ public class PathVisualizer {
 
         TransactionManager.endTransaction();
     }
+
+    private Color getColor(int index) {
+        return new Color[]{
+                Color.BLUE, Color.GREEN, Color.RED, Color.ORANGE, Color.PINK, Color.MAGENTA
+        }[index];
+    }
+
+    private String getAsHexColor(Color color){
+        return "#"+Integer.toHexString(color.getRGB()).substring(2);
+    }
+
+    public void drawPathsForRoutes(List<NodeRoute> routes){
+        int routeId = 0;
+
+        for(NodeRoute route : routes){
+            drawPathsOnRoute(route, routeId);
+            routeId++;
+        }
+    }
+
+    private void drawPathsOnRoute(NodeRoute route, int routeIndex) {
+        for (NodeConnection connection : route.route) {
+            try {
+                TransactionManager.beginTransaction();
+                connection.line.setProperty("line.color", getAsHexColor(getColor(routeIndex)));
+                TransactionManager.endTransaction();
+            } catch (InvalidEditingException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 }

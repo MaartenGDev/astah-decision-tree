@@ -46,6 +46,7 @@ public class PathFinder implements IPluginActionDelegate {
             for (IActivityNode node : activity.getActivityNodes()) {
                 ActivityNodeTypes nodeType = typeConverter.toEnum(node);
 
+
                 if (nodeType == ActivityNodeTypes.INITIAL_NODE) {
                     initialToDecisionNodes.addAll(getDirectlyConnectedToNodeOfTypeCount(node, ActivityNodeTypes.DECISION_NODE, new ArrayList<>(), new ArrayList<>(), true));
                     initialToFinalNodes.addAll(getDirectlyConnectedToNodeOfTypeCount(node, ActivityNodeTypes.FINAL_NODE, new ArrayList<>(), new ArrayList<>(), true));
@@ -76,6 +77,8 @@ public class PathFinder implements IPluginActionDelegate {
 
             // List<NodeConnection> myPath = getPathBetweenNodes(initialNodeConnection, finalNodeConnection, allConnections, new ArrayList<>());
 
+            pathVisualizer.drawPathsForRoutes(allConnections);
+
             for (NodeRoute connection : allConnections) {
                 System.out.println(connection.source.type + " -> " + connection.destination.type);
             }
@@ -88,7 +91,7 @@ public class PathFinder implements IPluginActionDelegate {
         return null;
     }
 
-    private List<NodeRoute> getDirectlyConnectedToNodeOfTypeCount(IActivityNode node, ActivityNodeTypes typeToFind, List<NodeConnection> route, List<NodeRoute> nodeRoutes, boolean isRootNode) throws InvalidUsingException {
+    private List<NodeRoute> getDirectlyConnectedToNodeOfTypeCount(IActivityNode node, ActivityNodeTypes typeToFind, List<NodeConnection> route, List<NodeRoute> nodeRoutes, boolean isRootNode) throws InvalidUsingException, InvalidEditingException {
         for (IFlow flow : node.getOutgoings()) {
             IActivityNode target = flow.getTarget();
             ActivityNodeTypes targetType = typeConverter.toEnum(target);
@@ -97,7 +100,10 @@ public class PathFinder implements IPluginActionDelegate {
                 route = new ArrayList<>();
             }
 
-            route.add(new NodeConnection(new ActivityNode(node), new ActivityNode(target)));
+            route.add(new NodeConnection(new ActivityNode(node), new ActivityNode(target), flow.getPresentations()[0]));
+
+            TransactionManager.beginTransaction();
+            TransactionManager.endTransaction();
 
             if (targetType == typeToFind) {
                 nodeRoutes.add(new NodeRoute(route.get(0).source, route.get(route.size() - 1).destination, route));
