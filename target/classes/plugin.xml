@@ -2,8 +2,8 @@
 <plugin>
     <extension point="com.change_vision.astah.ui.actionSets">
         <view
-                id="me.maartendev.PathFinderPanel"
+                id="me.maartendev.views.PathFinderPanel"
                 type="extraTab"
-                class="me.maartendev.PathFinderPanel"/>
+                class="me.maartendev.views.PathFinderPanel"/>
     </extension>
 </plugin>

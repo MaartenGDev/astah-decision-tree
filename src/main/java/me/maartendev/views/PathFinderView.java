@@ -2,6 +2,7 @@ package me.maartendev.views;
 
 import com.change_vision.jude.api.inf.AstahAPI;
 import com.change_vision.jude.api.inf.editor.ActivityDiagramEditor;
+import com.change_vision.jude.api.inf.editor.DiagramEditor;
 import com.change_vision.jude.api.inf.exception.InvalidEditingException;
 import com.change_vision.jude.api.inf.exception.InvalidUsingException;
 import com.change_vision.jude.api.inf.exception.ProjectNotFoundException;
@@ -28,31 +29,38 @@ public class PathFinderView {
     private NodeRouteDataTransformer nodeRouteDataTransformer;
     private PathVisualizer pathVisualizer;
 
-    public PathFinderView(){
+    public PathFinderView() {
         this.pathFinder = new PathFinder();
         this.nodeRouteDataTransformer = new NodeRouteDataTransformer();
         this.pathVisualizer = new PathVisualizer(new ColorSeeder());
     }
 
 
-    private IActivity getCurrentActivity(){
-        try{
+    private IActivity getActivityFromDiagram(ActivityDiagramEditor diagramEditor) {
+        return ((IActivityDiagram) diagramEditor.getDiagram()).getActivity();
+
+    }
+
+    private ActivityDiagramEditor getCurrentDiagramEditor() {
+        try {
             ProjectAccessor project = AstahAPI.getAstahAPI().getProjectAccessor();
 
             ActivityDiagramEditor diagramEditor = project.getDiagramEditorFactory().getActivityDiagramEditor();
             diagramEditor.setDiagram(project.getProject().getDiagrams()[0]);
 
-            return ((IActivityDiagram) diagramEditor.getDiagram()).getActivity();
+            return diagramEditor;
 
-        }catch (ClassNotFoundException | InvalidUsingException | InvalidEditingException | ProjectNotFoundException e){
+        } catch (ClassNotFoundException | InvalidUsingException | InvalidEditingException | ProjectNotFoundException e) {
             e.printStackTrace();
         }
 
         return null;
     }
 
-    public Container getContent(){
-        List<NodeRoute> routes = this.pathFinder.getAllRoutes(this.getCurrentActivity());
+    public Container getContent() throws InvalidUsingException, InvalidEditingException {
+        ActivityDiagramEditor diagramEditor = this.getCurrentDiagramEditor();
+
+        List<NodeRoute> routes = this.pathFinder.getAllRoutes(this.getActivityFromDiagram(diagramEditor));
 
         JButton button = new JButton("Get uses cases");
         button.getSize(new Dimension(40, 20));
@@ -73,7 +81,7 @@ public class PathFinderView {
 
                 int[] routeIds = Stream.of(routeIdsAsStrings).mapToInt(Integer::parseInt).toArray();
 
-                for(int routeId : routeIds){
+                for (int routeId : routeIds) {
                     NodeRoute route = getRouteById(routes, routeId);
                     pathVisualizer.drawPathsOnRoute(route, hasToShowRoutes ? route.activeLineColor : Color.BLACK);
                 }
@@ -83,10 +91,12 @@ public class PathFinderView {
         table.getColumn("Show").setCellRenderer(new ButtonRenderer());
         table.getColumn("Show").setCellEditor(new ButtonEditor(table, getId));
 
+        pathVisualizer.drawPathNumbers(diagramEditor, routes);
+
         return new JScrollPane(table);
     }
 
-    private NodeRoute getRouteById(List<NodeRoute> routes, Integer id){
+    private NodeRoute getRouteById(List<NodeRoute> routes, Integer id) {
         return routes.stream().filter(x -> x.id == id).findFirst().orElse(null);
     }
 }

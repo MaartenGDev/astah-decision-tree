@@ -3,8 +3,6 @@ package me.maartendev.pathfinder;
 
 import com.change_vision.jude.api.inf.exception.*;
 import com.change_vision.jude.api.inf.model.*;
-import com.change_vision.jude.api.inf.ui.IPluginActionDelegate;
-import com.change_vision.jude.api.inf.ui.IWindow;
 import me.maartendev.nodes.*;
 import me.maartendev.seeders.ColorSeeder;
 import me.maartendev.seeders.NumberSeeder;
@@ -13,9 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class PathFinder implements IPluginActionDelegate {
+public class PathFinder {
     private ActivityNodeTypeConverter typeConverter;
-    private PathVisualizer pathVisualizer;
     private ColorSeeder colorSeeder;
     private NumberSeeder numberSeeder;
 
@@ -23,39 +20,29 @@ public class PathFinder implements IPluginActionDelegate {
         typeConverter = new ActivityNodeTypeConverter();
         colorSeeder = new ColorSeeder();
         numberSeeder = new NumberSeeder();
-        pathVisualizer = new PathVisualizer(colorSeeder);
     }
 
-    public Object run(IWindow window) {
-
-
-        return null;
-    }
-
-    public List<NodeRoute> getAllRoutes(IActivity activity) {
+    public List<NodeRoute> getAllRoutes(IActivity activity) throws InvalidUsingException {
         List<NodeRoute> allConnections = new ArrayList<>();
 
-        try {
-            for (IActivityNode node : activity.getActivityNodes()) {
-                ActivityNodeTypes nodeType = typeConverter.toEnum(node);
+        for (IActivityNode node : activity.getActivityNodes()) {
+            ActivityNodeTypes nodeType = typeConverter.toEnum(node);
 
-                if (nodeType == ActivityNodeTypes.INITIAL_NODE) {
-                    allConnections.addAll(getDirectlyConnectedToNodeOfTypeCount(node, ActivityNodeTypes.DECISION_NODE, new ArrayList<>(), new ArrayList<>(), true));
-                    allConnections.addAll(getDirectlyConnectedToNodeOfTypeCount(node, ActivityNodeTypes.FINAL_NODE, new ArrayList<>(), new ArrayList<>(), true));
+            if (nodeType == ActivityNodeTypes.INITIAL_NODE) {
+                allConnections.addAll(getDirectlyConnectedToNodeOfTypeCount(node, ActivityNodeTypes.DECISION_NODE, new ArrayList<>(), new ArrayList<>(), true));
+                allConnections.addAll(getDirectlyConnectedToNodeOfTypeCount(node, ActivityNodeTypes.FINAL_NODE, new ArrayList<>(), new ArrayList<>(), true));
 
-                } else if (nodeType == ActivityNodeTypes.DECISION_NODE) {
-                    allConnections.addAll(getDirectlyConnectedToNodeOfTypeCount(node, ActivityNodeTypes.DECISION_NODE, new ArrayList<>(), new ArrayList<>(), true));
-                    allConnections.addAll(getDirectlyConnectedToNodeOfTypeCount(node, ActivityNodeTypes.FINAL_NODE, new ArrayList<>(), new ArrayList<>(), true));
-                }
+            } else if (nodeType == ActivityNodeTypes.DECISION_NODE) {
+                allConnections.addAll(getDirectlyConnectedToNodeOfTypeCount(node, ActivityNodeTypes.DECISION_NODE, new ArrayList<>(), new ArrayList<>(), true));
+                allConnections.addAll(getDirectlyConnectedToNodeOfTypeCount(node, ActivityNodeTypes.FINAL_NODE, new ArrayList<>(), new ArrayList<>(), true));
             }
-        } catch (InvalidUsingException | InvalidEditingException e) {
-            e.printStackTrace();
         }
+
 
         return allConnections;
     }
 
-    private List<NodeRoute> getDirectlyConnectedToNodeOfTypeCount(IActivityNode node, ActivityNodeTypes typeToFind, List<NodeConnection> route, List<NodeRoute> nodeRoutes, boolean isRootNode) throws InvalidUsingException, InvalidEditingException {
+    private List<NodeRoute> getDirectlyConnectedToNodeOfTypeCount(IActivityNode node, ActivityNodeTypes typeToFind, List<NodeConnection> route, List<NodeRoute> nodeRoutes, boolean isRootNode) throws InvalidUsingException {
         for (IFlow flow : node.getOutgoings()) {
             IActivityNode target = flow.getTarget();
             ActivityNodeTypes targetType = typeConverter.toEnum(target);

@@ -1,6 +1,8 @@
 package me.maartendev.views;
 
 
+import com.change_vision.jude.api.inf.exception.InvalidEditingException;
+import com.change_vision.jude.api.inf.exception.InvalidUsingException;
 import com.change_vision.jude.api.inf.project.ProjectAccessor;
 import com.change_vision.jude.api.inf.project.ProjectAccessorFactory;
 import com.change_vision.jude.api.inf.project.ProjectEvent;
@@ -33,7 +35,12 @@ public class PathFinderPanel extends JPanel implements IPluginExtraTabView, Proj
     }
 
     private Container createLabelPane() {
-       return (new PathFinderView()).getContent();
+        try {
+            return (new PathFinderView()).getContent();
+        } catch (InvalidUsingException | InvalidEditingException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @Override

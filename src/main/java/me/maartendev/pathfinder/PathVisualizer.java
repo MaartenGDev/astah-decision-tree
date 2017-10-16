@@ -17,7 +17,7 @@ public class PathVisualizer {
 
     private ColorSeeder colorSeeder;
 
-    public PathVisualizer(ColorSeeder colorSeeder){
+    public PathVisualizer(ColorSeeder colorSeeder) {
         this.colorSeeder = colorSeeder;
     }
 

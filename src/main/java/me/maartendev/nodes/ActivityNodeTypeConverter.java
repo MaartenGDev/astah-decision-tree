@@ -5,16 +5,25 @@ import com.change_vision.jude.api.inf.model.IActivityNode;
 
 public class ActivityNodeTypeConverter {
 
-    public ActivityNodeTypes toEnum(IActivityNode node) throws InvalidUsingException {
-        String type = node.getPresentations()[0].getType();
+    public ActivityNodeTypes toEnum(IActivityNode node) {
+        String type = "";
 
-        switch (type){
-            case "InitialNode": return ActivityNodeTypes.INITIAL_NODE;
+        try {
+            type = node.getPresentations()[0].getType();
+        } catch (InvalidUsingException e) {
+            e.printStackTrace();
+        }
+
+        switch (type) {
+            case "InitialNode":
+                return ActivityNodeTypes.INITIAL_NODE;
             case "Decision Node & Merge Node":
-                boolean hasMultipleOutputs=node.getOutgoings().length > 1;
+                boolean hasMultipleOutputs = node.getOutgoings().length > 1;
                 return hasMultipleOutputs ? ActivityNodeTypes.DECISION_NODE : ActivityNodeTypes.MERGE_NODE;
-            case "ActivityFinal": return ActivityNodeTypes.FINAL_NODE;
-            default: return ActivityNodeTypes.ACTION_NODE;
+            case "ActivityFinal":
+                return ActivityNodeTypes.FINAL_NODE;
+            default:
+                return ActivityNodeTypes.ACTION_NODE;
         }
     }
 }

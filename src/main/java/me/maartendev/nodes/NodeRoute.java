@@ -10,7 +10,7 @@ public class NodeRoute {
     public List<NodeConnection> route;
     public Color activeLineColor;
 
-    public NodeRoute(int id, ActivityNode source, ActivityNode destination, List<NodeConnection> route, Color activeLineColor){
+    public NodeRoute(int id, ActivityNode source, ActivityNode destination, List<NodeConnection> route, Color activeLineColor) {
         this.id = id;
         this.source = source;
         this.destination = destination;

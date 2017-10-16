@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Astah-Edition: all
 Astah-Version: 6.7
-Bnd-LastModified: 1508152153308
+Bnd-LastModified: 1508153950054
 Build-Jdk: 1.8.0_144
 Built-By: maarten
 Bundle-Activator: me.maartendev.Activator
@@ -13,12 +13,18 @@ Bundle-Version: 1.0.0.SNAPSHOT
 Created-By: Apache Maven Bundle Plugin
 Embed-Dependency: *;scope=compile|runtime;type=!pom
 Embed-Transitive: true
-Export-Package: me.maartendev;version="1.0.0.SNAPSHOT";uses:="com.change
- _vision.jude.api.inf.editor,com.change_vision.jude.api.inf.exception,co
- m.change_vision.jude.api.inf.model,com.change_vision.jude.api.inf.prese
- ntation,com.change_vision.jude.api.inf.project,com.change_vision.jude.a
- pi.inf.ui,javax.swing,org.osgi.framework",me.maartendev.table;version="
- 1.0.0.SNAPSHOT";uses:="javax.swing,javax.swing.table"
+Export-Package: me.maartendev;version="1.0.0.SNAPSHOT";uses:="org.osgi.f
+ ramework",me.maartendev.datatransformers;version="1.0.0.SNAPSHOT";uses:
+ ="me.maartendev.nodes",me.maartendev.nodes;version="1.0.0.SNAPSHOT";use
+ s:="com.change_vision.jude.api.inf.model,com.change_vision.jude.api.inf
+ .presentation",me.maartendev.pathfinder;version="1.0.0.SNAPSHOT";uses:=
+ "com.change_vision.jude.api.inf.editor,com.change_vision.jude.api.inf.e
+ xception,com.change_vision.jude.api.inf.model,me.maartendev.nodes,me.ma
+ artendev.seeders",me.maartendev.seeders;version="1.0.0.SNAPSHOT",me.maa
+ rtendev.table;version="1.0.0.SNAPSHOT";uses:="javax.swing,javax.swing.t
+ able",me.maartendev.views;version="1.0.0.SNAPSHOT";uses:="com.change_vi
+ sion.jude.api.inf.exception,com.change_vision.jude.api.inf.project,com.
+ change_vision.jude.api.inf.ui,javax.swing"
 Import-Package: com.change_vision.jude.api.inf;resolution:=optional,com.
  change_vision.jude.api.inf.editor;resolution:=optional,com.change_visio
  n.jude.api.inf.exception;resolution:=optional,com.change_vision.jude.ap
@@ -26,8 +32,11 @@ Import-Package: com.change_vision.jude.api.inf;resolution:=optional,com.
  ation;resolution:=optional,com.change_vision.jude.api.inf.project;resol
  ution:=optional,com.change_vision.jude.api.inf.ui;resolution:=optional,
  javax.swing;resolution:=optional,javax.swing.border;resolution:=optiona
- l,javax.swing.table;resolution:=optional,me.maartendev.table;resolution
- :=optional;version="[1.0,2)",org.osgi.framework;resolution:=optional;ve
- rsion="[1.5,2)"
+ l,javax.swing.table;resolution:=optional,me.maartendev.datatransformers
+ ;resolution:=optional;version="[1.0,2)",me.maartendev.nodes;resolution:
+ =optional;version="[1.0,2)",me.maartendev.pathfinder;resolution:=option
+ al;version="[1.0,2)",me.maartendev.seeders;resolution:=optional;version
+ ="[1.0,2)",me.maartendev.table;resolution:=optional;version="[1.0,2)",o
+ rg.osgi.framework;resolution:=optional;version="[1.5,2)"
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
 Tool: Bnd-3.3.0.201609221906
