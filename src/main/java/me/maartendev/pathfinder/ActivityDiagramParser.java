@@ -1,6 +1,8 @@
 package me.maartendev.pathfinder;
 
 
+import com.change_vision.jude.api.inf.editor.DiagramEditor;
+import com.change_vision.jude.api.inf.editor.TransactionManager;
 import com.change_vision.jude.api.inf.exception.*;
 import com.change_vision.jude.api.inf.model.*;
 import me.maartendev.nodes.*;
@@ -8,15 +10,17 @@ import me.maartendev.seeders.ColorSeeder;
 import me.maartendev.seeders.NumberSeeder;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
-public class PathFinder {
+public class ActivityDiagramParser {
     private ActivityNodeTypeConverter typeConverter;
     private ColorSeeder colorSeeder;
     private NumberSeeder numberSeeder;
 
-    public PathFinder() {
+    public ActivityDiagramParser() {
         typeConverter = new ActivityNodeTypeConverter();
         colorSeeder = new ColorSeeder();
         numberSeeder = new NumberSeeder();
@@ -42,6 +46,18 @@ public class PathFinder {
         return allConnections;
     }
 
+    public List<ActivityNode> findNodesOfType(IActivity activity, ActivityNodeTypes type) {
+        List<ActivityNode> nodesOfType = new ArrayList<>();
+
+        for(IActivityNode node : activity.getActivityNodes()){
+            if(typeConverter.toEnum(node) == type){
+                nodesOfType.add(new ActivityNode(node));
+            }
+        }
+
+        return nodesOfType;
+    }
+
     private List<NodeRoute> getDirectlyConnectedToNodeOfTypeCount(IActivityNode node, ActivityNodeTypes typeToFind, List<NodeConnection> route, List<NodeRoute> nodeRoutes, boolean isRootNode) throws InvalidUsingException {
         for (IFlow flow : node.getOutgoings()) {
             IActivityNode target = flow.getTarget();
@@ -63,6 +79,25 @@ public class PathFinder {
         }
 
         return nodeRoutes;
+    }
+
+    public void deleteWhere(IActivity activity, DiagramEditor diagramEditor, ActivityNodeTypes type, String text) {
+        for (ActivityNode node : this.findNodesOfType(activity, ActivityNodeTypes.CONNECTOR)) {
+            if(node.text.equals(text)){
+                try {
+                    if(diagramEditor != null){
+                        TransactionManager.beginTransaction();
+
+                        diagramEditor.deletePresentation(node.presentation);
+
+                        TransactionManager.endTransaction();
+                    }
+                } catch (InvalidEditingException e1) {
+                    e1.printStackTrace();
+                }
+            }
+
+        }
     }
 
     private List<NodeConnection> getPathBetweenNodes(NodeConnection start, NodeConnection end, List<NodeConnection> initialConnections, List<NodeConnection> connections) {

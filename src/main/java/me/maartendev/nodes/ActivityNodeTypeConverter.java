@@ -22,6 +22,10 @@ public class ActivityNodeTypeConverter {
                 return hasMultipleOutputs ? ActivityNodeTypes.DECISION_NODE : ActivityNodeTypes.MERGE_NODE;
             case "ActivityFinal":
                 return ActivityNodeTypes.FINAL_NODE;
+            case "Connector":
+                return ActivityNodeTypes.CONNECTOR;
+            case "Action":
+                return ActivityNodeTypes.ACTION_NODE;
             default:
                 return ActivityNodeTypes.ACTION_NODE;
         }

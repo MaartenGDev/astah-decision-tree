@@ -25,15 +25,14 @@ public class PathVisualizer {
         TransactionManager.beginTransaction();
 
         int connectionLabelOffset = ACTIVITY_ID_INDICATOR_RADIUS + 10;
-        int connectionId = 1;
 
-        for (NodeRoute connection : connections) {
-            double connectionSourceY = connection.source.location.getY();
+        for (NodeRoute route : connections) {
+            double connectionSourceY = route.source.location.getY();
 
-            double connectionDestinationY = connection.destination.location.getY();
+            double connectionDestinationY = route.destination.location.getY();
 
-            double connectionSourceX = connection.source.location.getX();
-            double connectionDestinationX = connection.destination.location.getX();
+            double connectionSourceX = route.source.location.getX();
+            double connectionDestinationX = route.destination.location.getX();
 
             double yClosestToTop = Math.min(connectionSourceY, connectionDestinationY);
             double yClosestToBottom = Math.max(connectionSourceY, connectionDestinationY);
@@ -56,9 +55,7 @@ public class PathVisualizer {
             }
 
 
-            diagramEditor.createConnector(String.valueOf(connectionId), new Point2D.Double(xPosition, yPosition));
-
-            connectionId++;
+            diagramEditor.createConnector(String.valueOf(route.id), new Point2D.Double(xPosition, yPosition));
         }
 
         TransactionManager.endTransaction();

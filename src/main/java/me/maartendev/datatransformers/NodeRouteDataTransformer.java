@@ -34,7 +34,7 @@ public class NodeRouteDataTransformer {
             data[routeTypeIndex][0] = routeTypeKey;
             data[routeTypeIndex][1] = String.join(",", convertIntegerToStringList(routeTypes.get(routeTypeKey)));
             data[routeTypeIndex][2] = routeTypes.get(routeTypeKey).size();
-            data[routeTypeIndex][3] = "Toggle";
+            data[routeTypeIndex][3] = "Show";
             routeTypeIndex++;
         }
 

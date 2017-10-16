@@ -2,7 +2,7 @@ package me.maartendev.views;
 
 import com.change_vision.jude.api.inf.AstahAPI;
 import com.change_vision.jude.api.inf.editor.ActivityDiagramEditor;
-import com.change_vision.jude.api.inf.editor.DiagramEditor;
+import com.change_vision.jude.api.inf.editor.TransactionManager;
 import com.change_vision.jude.api.inf.exception.InvalidEditingException;
 import com.change_vision.jude.api.inf.exception.InvalidUsingException;
 import com.change_vision.jude.api.inf.exception.ProjectNotFoundException;
@@ -10,8 +10,10 @@ import com.change_vision.jude.api.inf.model.IActivity;
 import com.change_vision.jude.api.inf.model.IActivityDiagram;
 import com.change_vision.jude.api.inf.project.ProjectAccessor;
 import me.maartendev.datatransformers.NodeRouteDataTransformer;
+import me.maartendev.nodes.ActivityNode;
+import me.maartendev.nodes.ActivityNodeTypes;
 import me.maartendev.nodes.NodeRoute;
-import me.maartendev.pathfinder.PathFinder;
+import me.maartendev.pathfinder.ActivityDiagramParser;
 import me.maartendev.pathfinder.PathVisualizer;
 import me.maartendev.seeders.ColorSeeder;
 import me.maartendev.table.ButtonEditor;
@@ -21,16 +23,20 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class PathFinderView {
-    private PathFinder pathFinder;
+    private ActivityDiagramParser pathFinder;
     private NodeRouteDataTransformer nodeRouteDataTransformer;
     private PathVisualizer pathVisualizer;
 
     public PathFinderView() {
-        this.pathFinder = new PathFinder();
+        this.pathFinder = new ActivityDiagramParser();
         this.nodeRouteDataTransformer = new NodeRouteDataTransformer();
         this.pathVisualizer = new PathVisualizer(new ColorSeeder());
     }
@@ -60,7 +66,9 @@ public class PathFinderView {
     public Container getContent() throws InvalidUsingException, InvalidEditingException {
         ActivityDiagramEditor diagramEditor = this.getCurrentDiagramEditor();
 
-        List<NodeRoute> routes = this.pathFinder.getAllRoutes(this.getActivityFromDiagram(diagramEditor));
+        IActivity activity = this.getActivityFromDiagram(diagramEditor);
+
+        List<NodeRoute> routes = this.pathFinder.getAllRoutes(activity);
 
         JButton button = new JButton("Get uses cases");
         button.getSize(new Dimension(40, 20));
@@ -79,11 +87,24 @@ public class PathFinderView {
 
                 String[] routeIdsAsStrings = table.getValueAt(table.getSelectedRow(), table.getColumn("Route Ids").getModelIndex()).toString().split(",");
 
-                int[] routeIds = Stream.of(routeIdsAsStrings).mapToInt(Integer::parseInt).toArray();
+                List<NodeRoute> activeRoutes = new ArrayList<>();
 
-                for (int routeId : routeIds) {
-                    NodeRoute route = getRouteById(routes, routeId);
+                for (String routeId : routeIdsAsStrings) {
+                    NodeRoute route = getRouteById(routes, Integer.parseInt(routeId));
+
+                    if(hasToShowRoutes){
+                        activeRoutes.add(route);
+                    }else{
+                        pathFinder.deleteWhere(activity, diagramEditor, ActivityNodeTypes.CONNECTOR, routeId);
+                    }
+
                     pathVisualizer.drawPathsOnRoute(route, hasToShowRoutes ? route.activeLineColor : Color.BLACK);
+                }
+
+                try {
+                    pathVisualizer.drawPathNumbers(diagramEditor, activeRoutes);
+                } catch (InvalidEditingException e1) {
+                    e1.printStackTrace();
                 }
             }
         };
@@ -91,7 +112,6 @@ public class PathFinderView {
         table.getColumn("Show").setCellRenderer(new ButtonRenderer());
         table.getColumn("Show").setCellEditor(new ButtonEditor(table, getId));
 
-        pathVisualizer.drawPathNumbers(diagramEditor, routes);
 
         return new JScrollPane(table);
     }
