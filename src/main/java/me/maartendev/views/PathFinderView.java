@@ -2,7 +2,6 @@ package me.maartendev.views;
 
 import com.change_vision.jude.api.inf.AstahAPI;
 import com.change_vision.jude.api.inf.editor.ActivityDiagramEditor;
-import com.change_vision.jude.api.inf.editor.TransactionManager;
 import com.change_vision.jude.api.inf.exception.InvalidEditingException;
 import com.change_vision.jude.api.inf.exception.InvalidUsingException;
 import com.change_vision.jude.api.inf.exception.ProjectNotFoundException;
@@ -10,7 +9,6 @@ import com.change_vision.jude.api.inf.model.IActivity;
 import com.change_vision.jude.api.inf.model.IActivityDiagram;
 import com.change_vision.jude.api.inf.project.ProjectAccessor;
 import me.maartendev.datatransformers.NodeRouteDataTransformer;
-import me.maartendev.nodes.ActivityNode;
 import me.maartendev.nodes.ActivityNodeTypes;
 import me.maartendev.nodes.NodeRoute;
 import me.maartendev.pathfinder.ActivityDiagramParser;
@@ -24,10 +22,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class PathFinderView {
@@ -63,15 +58,25 @@ public class PathFinderView {
         return null;
     }
 
+
     public Container getContent() throws InvalidUsingException, InvalidEditingException {
         ActivityDiagramEditor diagramEditor = this.getCurrentDiagramEditor();
-
         IActivity activity = this.getActivityFromDiagram(diagramEditor);
-
         List<NodeRoute> routes = this.pathFinder.getAllRoutes(activity);
 
+        JTable table = this.buildTable(activity, diagramEditor, routes);
+
+        JScrollPane panel = new JScrollPane(table);
+
         JButton button = new JButton("Get uses cases");
-        button.getSize(new Dimension(40, 20));
+        button.setSize(new Dimension(40, 20));
+
+
+        return panel;
+    }
+
+    private JTable buildTable(IActivity activity, ActivityDiagramEditor diagramEditor, List<NodeRoute> routes) {
+
 
         Object data[][] = this.nodeRouteDataTransformer.getAsObject(routes);
 
@@ -87,36 +92,15 @@ public class PathFinderView {
 
                 String[] routeIdsAsStrings = table.getValueAt(table.getSelectedRow(), table.getColumn("Route Ids").getModelIndex()).toString().split(",");
 
-                List<NodeRoute> activeRoutes = new ArrayList<>();
+                int[] routeIds = Stream.of(routeIdsAsStrings).mapToInt(Integer::parseInt).toArray();
 
-                for (String routeId : routeIdsAsStrings) {
-                    NodeRoute route = getRouteById(routes, Integer.parseInt(routeId));
-
-                    if(hasToShowRoutes){
-                        activeRoutes.add(route);
-                    }else{
-                        pathFinder.deleteWhere(activity, diagramEditor, ActivityNodeTypes.CONNECTOR, routeId);
-                    }
-
-                    pathVisualizer.drawPathsOnRoute(route, hasToShowRoutes ? route.activeLineColor : Color.BLACK);
-                }
-
-                try {
-                    pathVisualizer.drawPathNumbers(diagramEditor, activeRoutes);
-                } catch (InvalidEditingException e1) {
-                    e1.printStackTrace();
-                }
+                pathVisualizer.toggleRouteByIds(activity, diagramEditor, pathFinder, routes, routeIds, hasToShowRoutes);
             }
         };
 
         table.getColumn("Show").setCellRenderer(new ButtonRenderer());
         table.getColumn("Show").setCellEditor(new ButtonEditor(table, getId));
 
-
-        return new JScrollPane(table);
-    }
-
-    private NodeRoute getRouteById(List<NodeRoute> routes, Integer id) {
-        return routes.stream().filter(x -> x.id == id).findFirst().orElse(null);
+        return table;
     }
 }

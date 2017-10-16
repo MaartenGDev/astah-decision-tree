@@ -3,12 +3,15 @@ package me.maartendev.pathfinder;
 import com.change_vision.jude.api.inf.editor.ActivityDiagramEditor;
 import com.change_vision.jude.api.inf.editor.TransactionManager;
 import com.change_vision.jude.api.inf.exception.InvalidEditingException;
+import com.change_vision.jude.api.inf.model.IActivity;
+import me.maartendev.nodes.ActivityNodeTypes;
 import me.maartendev.nodes.NodeConnection;
 import me.maartendev.nodes.NodeRoute;
 import me.maartendev.seeders.ColorSeeder;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
 import java.util.List;
 
 public class PathVisualizer {
@@ -21,7 +24,7 @@ public class PathVisualizer {
         this.colorSeeder = colorSeeder;
     }
 
-    public void drawPathNumbers(ActivityDiagramEditor diagramEditor, List<NodeRoute> connections) throws InvalidEditingException {
+    public void drawPathNumbers(ActivityDiagramEditor diagramEditor, List<NodeRoute> connections) {
         TransactionManager.beginTransaction();
 
         int connectionLabelOffset = ACTIVITY_ID_INDICATOR_RADIUS + 10;
@@ -54,8 +57,11 @@ public class PathVisualizer {
                 xPosition += connectionLabelOffset;
             }
 
-
-            diagramEditor.createConnector(String.valueOf(route.id), new Point2D.Double(xPosition, yPosition));
+            try {
+                diagramEditor.createConnector(String.valueOf(route.id), new Point2D.Double(xPosition, yPosition));
+            } catch (InvalidEditingException e) {
+                e.printStackTrace();
+            }
         }
 
         TransactionManager.endTransaction();
@@ -72,6 +78,28 @@ public class PathVisualizer {
                 e.printStackTrace();
             }
         }
+    }
+
+    private NodeRoute getRouteById(List<NodeRoute> routes, Integer id) {
+        return routes.stream().filter(x -> x.id == id).findFirst().orElse(null);
+    }
+
+    public void toggleRouteByIds(IActivity activity, ActivityDiagramEditor diagramEditor, ActivityDiagramParser diagramParser, List<NodeRoute> routes, int[] ids, boolean isActive){
+        List<NodeRoute> activeRoutes = new ArrayList<>();
+
+        for (Integer routeId : ids) {
+            NodeRoute route = getRouteById(routes, routeId);
+
+            if (isActive) {
+                activeRoutes.add(route);
+            } else {
+                diagramParser.deleteWhere(activity, diagramEditor, ActivityNodeTypes.CONNECTOR, String.valueOf(routeId));
+            }
+
+            this.drawPathsOnRoute(route, isActive ? route.activeLineColor : Color.BLACK);
+        }
+
+        this.drawPathNumbers(diagramEditor, activeRoutes);
     }
 
 }
