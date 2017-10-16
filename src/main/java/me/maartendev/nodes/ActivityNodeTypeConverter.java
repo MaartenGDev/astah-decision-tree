@@ -1,4 +1,4 @@
-package me.maartendev;
+package me.maartendev.nodes;
 
 import com.change_vision.jude.api.inf.exception.InvalidUsingException;
 import com.change_vision.jude.api.inf.model.IActivityNode;

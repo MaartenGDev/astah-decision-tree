@@ -1,4 +1,4 @@
-package me.maartendev;
+package me.maartendev.nodes;
 
 public enum ActivityNodeTypes {
     INITIAL_NODE,

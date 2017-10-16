@@ -1,8 +1,7 @@
-package me.maartendev;
+package me.maartendev.nodes;
 
 import com.change_vision.jude.api.inf.presentation.IPresentation;
-
-import java.util.List;
+import me.maartendev.nodes.ActivityNode;
 
 public class NodeConnection {
     public ActivityNode source;
