@@ -21,4 +21,8 @@ public class ColorSeeder {
     public String getAsHexColor(Color color){
         return "#"+Integer.toHexString(color.getRGB()).substring(2);
     }
+
+    public void reset(){
+        this.colorIndex = 0;
+    }
 }

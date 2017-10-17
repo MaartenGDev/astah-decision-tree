@@ -55,9 +55,9 @@ public class ButtonColumn extends AbstractCellEditor implements TableCellRendere
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
         this.editorValue = "test";
-        JButton btn = new JButton("Toggle pls");
+        JButton btn = new JButton("Toggle");
 
-        return getButtonWithValue(btn, "bier" + actionButtons.size());
+        return getButtonWithValue(btn, "test");
     }
 
     @Override
@@ -69,14 +69,14 @@ public class ButtonColumn extends AbstractCellEditor implements TableCellRendere
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 
         renderButton.setForeground(isSelected ? table.getSelectionForeground() : table.getForeground());
-        renderButton.setBackground(isSelected ? table.getSelectionBackground() : UIManager.getColor("Button.background"));
+        renderButton.setBackground(Color.WHITE);
 
         renderButton.setBorder(hasFocus ? focusBorder : originalBorder);
 
-        JButton btn = new JButton("Toggle pls");
+        JButton btn = new JButton("Toggle");
         actionButtons.add(btn);
 
-        return getButtonWithValue(btn, "bier" + actionButtons.size());
+        return getButtonWithValue(btn, "Toggle");
     }
 
     private JButton getButtonWithValue(JButton button, Object value) {

@@ -9,7 +9,6 @@ import com.change_vision.jude.api.inf.model.IActivity;
 import com.change_vision.jude.api.inf.model.IActivityDiagram;
 import com.change_vision.jude.api.inf.project.ProjectAccessor;
 import me.maartendev.datatransformers.NodeRouteDataTransformer;
-import me.maartendev.nodes.ActivityNodeTypes;
 import me.maartendev.nodes.NodeRoute;
 import me.maartendev.pathfinder.ActivityDiagramParser;
 import me.maartendev.pathfinder.PathVisualizer;
@@ -21,17 +20,16 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
 public class PathFinderView {
-    private ActivityDiagramParser pathFinder;
+    private ActivityDiagramParser activityDiagramParser;
     private NodeRouteDataTransformer nodeRouteDataTransformer;
     private PathVisualizer pathVisualizer;
 
     public PathFinderView() {
-        this.pathFinder = new ActivityDiagramParser();
+        this.activityDiagramParser = new ActivityDiagramParser();
         this.nodeRouteDataTransformer = new NodeRouteDataTransformer();
         this.pathVisualizer = new PathVisualizer(new ColorSeeder());
     }
@@ -60,23 +58,33 @@ public class PathFinderView {
 
 
     public Container getContent() throws InvalidUsingException, InvalidEditingException {
-        ActivityDiagramEditor diagramEditor = this.getCurrentDiagramEditor();
-        IActivity activity = this.getActivityFromDiagram(diagramEditor);
-        List<NodeRoute> routes = this.pathFinder.getAllRoutes(activity);
+        JTable table = this.buildTable();
 
-        JTable table = this.buildTable(activity, diagramEditor, routes);
-
-        JScrollPane panel = new JScrollPane(table);
-
+        JPanel panel = new JPanel(new BorderLayout());
         JButton button = new JButton("Get uses cases");
-        button.setSize(new Dimension(40, 20));
 
+        JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
+        actionPanel.add(button);
+
+        panel.add(actionPanel, BorderLayout.PAGE_START);
+        panel.add(table, BorderLayout.CENTER);
+
+        button.addActionListener(e -> {
+            panel.remove(table);
+            panel.add(this.buildTable(), BorderLayout.CENTER);
+            panel.revalidate();
+        });
+
+        panel.revalidate();
 
         return panel;
     }
 
-    private JTable buildTable(IActivity activity, ActivityDiagramEditor diagramEditor, List<NodeRoute> routes) {
-
+    private JTable buildTable() {
+        ActivityDiagramEditor diagramEditor = this.getCurrentDiagramEditor();
+        IActivity activity = this.getActivityFromDiagram(diagramEditor);
+        List<NodeRoute> routes = this.activityDiagramParser.getAllRoutes(activity);
 
         Object data[][] = this.nodeRouteDataTransformer.getAsObject(routes);
 
@@ -94,12 +102,16 @@ public class PathFinderView {
 
                 int[] routeIds = Stream.of(routeIdsAsStrings).mapToInt(Integer::parseInt).toArray();
 
-                pathVisualizer.toggleRouteByIds(activity, diagramEditor, pathFinder, routes, routeIds, hasToShowRoutes);
+                pathVisualizer.toggleRouteByIds(activity, diagramEditor, activityDiagramParser, routes, routeIds, hasToShowRoutes);
             }
         };
 
         table.getColumn("Show").setCellRenderer(new ButtonRenderer());
         table.getColumn("Show").setCellEditor(new ButtonEditor(table, getId));
+
+        table.setRowHeight(table.getRowHeight() + 8);
+        table.setGridColor(Color.LIGHT_GRAY);
+        table.setBackground(Color.WHITE);
 
         return table;
     }

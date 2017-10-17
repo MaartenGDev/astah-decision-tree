@@ -6,4 +6,8 @@ public class NumberSeeder {
     public int getNext(){
         return ++lastNumber;
     }
+
+    public void reset(){
+        this.lastNumber = 0;
+    }
 }
