@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Astah-Edition: all
 Astah-Version: 6.7
-Bnd-LastModified: 1508270774748
+Bnd-LastModified: 1508357019925
 Build-Jdk: 1.8.0_144
 Built-By: maarten
 Bundle-Activator: me.maartendev.Activator
@@ -22,9 +22,8 @@ Export-Package: me.maartendev;version="1.0.0.SNAPSHOT";uses:="org.osgi.f
  odel,me.maartendev.nodes,me.maartendev.seeders",me.maartendev.seeders;v
  ersion="1.0.0.SNAPSHOT",me.maartendev.table;version="1.0.0.SNAPSHOT";us
  es:="javax.swing,javax.swing.table",me.maartendev.views;version="1.0.0.
- SNAPSHOT";uses:="com.change_vision.jude.api.inf.exception,com.change_vi
- sion.jude.api.inf.project,com.change_vision.jude.api.inf.ui,javax.swing
- "
+ SNAPSHOT";uses:="com.change_vision.jude.api.inf.project,com.change_visi
+ on.jude.api.inf.ui,javax.swing"
 Import-Package: com.change_vision.jude.api.inf;resolution:=optional,com.
  change_vision.jude.api.inf.editor;resolution:=optional,com.change_visio
  n.jude.api.inf.exception;resolution:=optional,com.change_vision.jude.ap

@@ -15,9 +15,11 @@ import java.awt.*;
 
 public class PathFinderPanel extends JPanel implements IPluginExtraTabView, ProjectEventListener {
 
-    public Container content;
+    private Container content;
+    private PathFinderView pathFinderView;
 
     public PathFinderPanel() {
+        pathFinderView = new PathFinderView();
         initComponents();
     }
 
@@ -37,26 +39,13 @@ public class PathFinderPanel extends JPanel implements IPluginExtraTabView, Proj
     }
 
     private Container createLabelPane() {
-        try {
-            content = (new PathFinderView()).getContent();
-            return content;
-        } catch (InvalidUsingException | InvalidEditingException e) {
-            e.printStackTrace();
-        }
-        return null;
+        content = pathFinderView.refreshContent();
+        return content;
     }
 
     @Override
     public void projectChanged(ProjectEvent e) {
-        this.revalidate();
-        this.remove(content);
-        try {
-            this.add((new PathFinderView()).getContent());
-        } catch (InvalidUsingException e1) {
-            e1.printStackTrace();
-        } catch (InvalidEditingException e1) {
-            e1.printStackTrace();
-        }
+        pathFinderView.refreshTableContent();
     }
 
     @Override
@@ -87,11 +76,8 @@ public class PathFinderPanel extends JPanel implements IPluginExtraTabView, Proj
     }
 
     public void activated() {
-        this.repaint();
-        this.revalidate();
     }
 
     public void deactivated() {
-        this.repaint();
     }
 }

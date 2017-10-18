@@ -8,7 +8,7 @@ public class ColorSeeder {
 
     public ColorSeeder(){
         this.colors = new Color[]{
-            Color.BLUE, Color.GREEN, Color.RED, Color.ORANGE, Color.PINK, Color.MAGENTA
+            Color.BLUE, Color.GREEN, Color.RED, Color.ORANGE, Color.PINK, Color.MAGENTA, Color.GRAY, Color.LIGHT_GRAY
         };
     }
 

@@ -27,8 +27,8 @@ public class ButtonEditor extends DefaultCellEditor {
     }
 
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-//        button.setForeground(isSelected ? table.getSelectionForeground() : table.getForeground());
-//        button.setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
+       button.setForeground(isSelected ? table.getSelectionForeground() : table.getForeground());
+        button.setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
 
         label = stateIsOn ? "Show" : "Hide";
         button.setText(label);
