@@ -25,8 +25,6 @@ public class PathVisualizer {
     }
 
     public void drawPathNumbers(ActivityDiagramEditor diagramEditor, List<NodeRoute> connections) {
-        TransactionManager.beginTransaction();
-
         int connectionLabelOffset = ACTIVITY_ID_INDICATOR_RADIUS + 10;
 
         for (NodeRoute route : connections) {
@@ -58,13 +56,16 @@ public class PathVisualizer {
             }
 
             try {
+                TransactionManager.beginTransaction();
+
                 diagramEditor.createConnector(String.valueOf(route.id), new Point2D.Double(xPosition, yPosition));
+                TransactionManager.endTransaction();
             } catch (InvalidEditingException e) {
+                TransactionManager.abortTransaction();
                 e.printStackTrace();
             }
         }
 
-        TransactionManager.endTransaction();
     }
 
 
@@ -75,6 +76,7 @@ public class PathVisualizer {
                 connection.line.setProperty("line.color", this.colorSeeder.getAsHexColor(color));
                 TransactionManager.endTransaction();
             } catch (InvalidEditingException e) {
+                TransactionManager.abortTransaction();
                 e.printStackTrace();
             }
         }
@@ -84,8 +86,9 @@ public class PathVisualizer {
         return routes.stream().filter(x -> x.id == id).findFirst().orElse(null);
     }
 
-    public void toggleRouteByIds(IActivity activity, ActivityDiagramEditor diagramEditor, ActivityDiagramParser diagramParser, List<NodeRoute> routes, int[] ids, boolean isActive){
+    public void toggleRouteByIds(IActivity activity, ActivityDiagramEditor diagramEditor, ActivityDiagramParser diagramParser, List<NodeRoute> routes, int[] ids, boolean isActive) {
         List<NodeRoute> activeRoutes = new ArrayList<>();
+
 
         for (Integer routeId : ids) {
             NodeRoute route = getRouteById(routes, routeId);

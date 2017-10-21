@@ -89,18 +89,17 @@ public class ActivityDiagramParser {
     }
 
     public void deleteWhere(IActivity activity, DiagramEditor diagramEditor, ActivityNodeTypes type, String text) {
-        for (ActivityNode node : this.findNodesOfType(activity, ActivityNodeTypes.CONNECTOR)) {
+        for (ActivityNode node : this.findNodesOfType(activity, type)) {
             if(node.text.equals(text)){
                 try {
                     if(diagramEditor != null){
                         TransactionManager.beginTransaction();
-
                         diagramEditor.deletePresentation(node.presentation);
-
                         TransactionManager.endTransaction();
                     }
                 } catch (InvalidEditingException e1) {
                     e1.printStackTrace();
+                    TransactionManager.abortTransaction();
                 }
             }
 

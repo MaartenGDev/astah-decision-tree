@@ -1,23 +1,16 @@
 package me.maartendev.views;
 
-import com.change_vision.jude.api.inf.AstahAPI;
 import com.change_vision.jude.api.inf.editor.ActivityDiagramEditor;
-import com.change_vision.jude.api.inf.exception.InvalidEditingException;
-import com.change_vision.jude.api.inf.exception.InvalidUsingException;
-import com.change_vision.jude.api.inf.exception.ProjectNotFoundException;
 import com.change_vision.jude.api.inf.model.IActivity;
-import com.change_vision.jude.api.inf.model.IActivityDiagram;
-import com.change_vision.jude.api.inf.project.ProjectAccessor;
 import me.maartendev.datatransformers.NodeRouteDataTransformer;
 import me.maartendev.nodes.NodeRoute;
 import me.maartendev.pathfinder.ActivityDiagramParser;
 import me.maartendev.pathfinder.PathVisualizer;
+import me.maartendev.projects.ProjectManager;
 import me.maartendev.seeders.ColorSeeder;
-import me.maartendev.table.ButtonEditor;
-import me.maartendev.table.ButtonRenderer;
+import me.maartendev.table.InteractiveTable;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.List;
@@ -25,60 +18,37 @@ import java.util.stream.Stream;
 
 public class PathFinderView {
     private ActivityDiagramParser activityDiagramParser;
-    private NodeRouteDataTransformer nodeRouteDataTransformer;
     private PathVisualizer pathVisualizer;
-    private AbstractAction cellButtonClickHandler;
-
-    private JTable pathsTable;
+    private InteractiveTable testCaseTable;
+    private ProjectManager projectManager;
+    private NodeRouteDataTransformer nodeRouteDataTransformer;
 
     public PathFinderView() {
-        this.activityDiagramParser = new ActivityDiagramParser();
         this.nodeRouteDataTransformer = new NodeRouteDataTransformer();
+        this.activityDiagramParser = new ActivityDiagramParser();
         this.pathVisualizer = new PathVisualizer(new ColorSeeder());
+        this.projectManager = new ProjectManager();
+
+        this.testCaseTable = new InteractiveTable(projectManager, activityDiagramParser, nodeRouteDataTransformer, pathVisualizer, buildCellButtonClickHandler());
+        this.testCaseTable.setHeaders(new String[]{"Type", "Route Ids", "Count", "Show"});
     }
-
-
-    private IActivity getActivityFromDiagram(ActivityDiagramEditor diagramEditor) {
-        return ((IActivityDiagram) diagramEditor.getDiagram()).getActivity();
-
-    }
-
-    private ActivityDiagramEditor getCurrentDiagramEditor() {
-        try {
-            ProjectAccessor project = AstahAPI.getAstahAPI().getProjectAccessor();
-
-            ActivityDiagramEditor diagramEditor = project.getDiagramEditorFactory().getActivityDiagramEditor();
-            diagramEditor.setDiagram(project.getProject().getDiagrams()[0]);
-
-            return diagramEditor;
-
-        } catch (ClassNotFoundException | InvalidUsingException | InvalidEditingException | ProjectNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
 
     public void clearDiagramAnnotations() {
-        ActivityDiagramEditor diagramEditor = this.getCurrentDiagramEditor();
-        IActivity activity = this.getActivityFromDiagram(diagramEditor);
+        ActivityDiagramEditor diagramEditor = this.projectManager.getCurrentDiagramEditor();
+        IActivity activity = this.projectManager.getCurrentActivity();
         List<NodeRoute> routes = this.activityDiagramParser.getAllRoutes(activity);
         int[] routeIds = routes.stream().mapToInt(x -> x.id).toArray();
 
         pathVisualizer.toggleRouteByIds(activity, diagramEditor, activityDiagramParser, routes, routeIds, false);
     }
 
+    private List<NodeRoute> getCurrentRoutes(){
+        IActivity activity = this.projectManager.getCurrentActivity();
+        return this.activityDiagramParser.getAllRoutes(activity);
+    }
+
     public Container refreshContent() {
         this.clearDiagramAnnotations();
-
-        if(cellButtonClickHandler == null){
-            cellButtonClickHandler = buildCellButtonClickHandler();
-        }
-
-        if(pathsTable == null){
-            pathsTable = this.buildTable();
-        }
 
         JPanel panel = new JPanel(new BorderLayout());
         JButton button = new JButton("Get uses cases");
@@ -88,7 +58,7 @@ public class PathFinderView {
         actionPanel.add(button);
 
         panel.add(actionPanel, BorderLayout.PAGE_START);
-        panel.add(pathsTable, BorderLayout.CENTER);
+        panel.add(this.testCaseTable.getTable(), BorderLayout.CENTER);
 
         button.addActionListener(e -> {
             this.clearDiagramAnnotations();
@@ -98,67 +68,25 @@ public class PathFinderView {
         return panel;
     }
 
-
-    public void refreshTableContent(){
-        pathsTable.setModel(this.buildTableModel());
-
-        pathsTable = addCellEditorAndRenderer(pathsTable);
+    public void refreshTableContent() {
+        this.testCaseTable.setTableData(this.nodeRouteDataTransformer.getAsObject(this.getCurrentRoutes()));
     }
 
-    private JTable buildTable() {
-        ActivityDiagramEditor diagramEditor = this.getCurrentDiagramEditor();
-        IActivity activity = this.getActivityFromDiagram(diagramEditor);
-        List<NodeRoute> routes = this.activityDiagramParser.getAllRoutes(activity);
-
-        JTable table = new JTable(this.buildTableModel());
-        table = addCellEditorAndRenderer(table);
-
-
-        table.getColumn("Show").setCellRenderer(new ButtonRenderer());
-        table.getColumn("Show").setCellEditor(new ButtonEditor(table, cellButtonClickHandler));
-
-        table.setRowHeight(table.getRowHeight() + 8);
-        table.setGridColor(Color.LIGHT_GRAY);
-        table.setBackground(Color.WHITE);
-
-        return table;
-    }
-
-    private JTable addCellEditorAndRenderer(JTable table){
-        table.getColumn("Show").setCellRenderer(new ButtonRenderer());
-        table.getColumn("Show").setCellEditor(new ButtonEditor(pathsTable, cellButtonClickHandler));
-
-        return table;
-    }
-
-
-    private DefaultTableModel buildTableModel(){
-        ActivityDiagramEditor diagramEditor = this.getCurrentDiagramEditor();
-        IActivity activity = this.getActivityFromDiagram(diagramEditor);
-        List<NodeRoute> routes = this.activityDiagramParser.getAllRoutes(activity);
-
-        Object data[][] = this.nodeRouteDataTransformer.getAsObject(routes);
-
-        Object columns[] = {"Type", "Route Ids", "Count", "Show"};
-
-        return new DefaultTableModel(data, columns);
-    }
-
-    private AbstractAction buildCellButtonClickHandler(){
-        ActivityDiagramEditor diagramEditor = this.getCurrentDiagramEditor();
-        IActivity activity = this.getActivityFromDiagram(diagramEditor);
-        List<NodeRoute> routes = this.activityDiagramParser.getAllRoutes(activity);
-
-        return  new AbstractAction() {
+    private AbstractAction buildCellButtonClickHandler() {
+        return new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
-                JTable table = (JTable) e.getSource();
+                IActivity activity = projectManager.getCurrentActivity();
+                List<NodeRoute> routes = getCurrentRoutes();
+
+                JTable table = testCaseTable.getTable();
+
                 boolean hasToShowRoutes = Boolean.parseBoolean(e.getActionCommand());
 
                 String[] routeIdsAsStrings = table.getValueAt(table.getSelectedRow(), table.getColumn("Route Ids").getModelIndex()).toString().split(",");
 
                 int[] routeIds = Stream.of(routeIdsAsStrings).mapToInt(Integer::parseInt).toArray();
 
-                pathVisualizer.toggleRouteByIds(activity, diagramEditor, activityDiagramParser, routes, routeIds, hasToShowRoutes);
+                pathVisualizer.toggleRouteByIds(activity, projectManager.getCurrentDiagramEditor(), activityDiagramParser, routes, routeIds, hasToShowRoutes);
             }
         };
     }
