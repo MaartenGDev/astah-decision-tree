@@ -49,11 +49,15 @@ public class ActivityNodeTreeBuilder {
     public List<NodeRoute> getAllRoutesToType(ActivityNode initialNode, ActivityNodeTree nodeTree, ActivityNodeTypes endType){
         this.numberSeeder.reset();
 
-        return getAllRoutesToType(initialNode, nodeTree, endType, new NodeRoute(), new ArrayList<>());
+        return getAllRoutesToType(initialNode, nodeTree, endType, new NodeRoute(), new ArrayList<>(), new ArrayList<>());
     }
 
-    private List<NodeRoute> getAllRoutesToType(ActivityNode initialNode, ActivityNodeTree nodeTree, ActivityNodeTypes endType, NodeRoute nodeRoute, List<NodeRoute> nodeRoutes) {
+    private List<NodeRoute> getAllRoutesToType(ActivityNode initialNode, ActivityNodeTree nodeTree, ActivityNodeTypes endType, NodeRoute nodeRoute, List<NodeRoute> nodeRoutes, List<NodeConnection> routeBeforeSwitch) {
         nodeRoute.source = initialNode;
+
+        if(nodeTree.children.size() > 1){
+            routeBeforeSwitch = new ArrayList<>(nodeRoute.route);
+        }
 
         for (ActivityNodeTree node : nodeTree.children) {
             nodeRoute.route.add(new NodeConnection(nodeTree.root, node.root, node.root.line));
@@ -64,11 +68,11 @@ public class ActivityNodeTreeBuilder {
 
                 nodeRoute.destination = node.root;
                 nodeRoutes.add(new NodeRoute(nodeRoute));
-                nodeRoute.route = new ArrayList<>();
+                nodeRoute.route = new ArrayList<>(routeBeforeSwitch);
             }
 
             if (node.children.size() > 0) {
-                nodeRoutes = getAllRoutesToType(initialNode, node, endType, nodeRoute, nodeRoutes);
+                nodeRoutes = getAllRoutesToType(initialNode, node, endType, nodeRoute, nodeRoutes, routeBeforeSwitch);
             }
         }
 

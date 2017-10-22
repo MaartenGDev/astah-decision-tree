@@ -27,4 +27,7 @@ public class NodeRoute {
         this.activeLineColor = activeLineColor;
     }
 
+    public Integer getRouteLength(){
+        return route.size();
+    }
 }
