@@ -24,7 +24,7 @@ public class ActivityDiagramParser {
         numberSeeder = new NumberSeeder();
     }
 
-    public List<NodeRoute> getAllRoutes(IActivity activity){
+    public List<NodeRoute> getAllRoutes(IActivity activity) {
         colorSeeder.reset();
         numberSeeder.reset();
 
@@ -50,8 +50,8 @@ public class ActivityDiagramParser {
     public List<ActivityNode> findNodesOfType(IActivity activity, ActivityNodeTypes type) {
         List<ActivityNode> nodesOfType = new ArrayList<>();
 
-        for(IActivityNode node : activity.getActivityNodes()){
-            if(typeConverter.toEnum(node) == type){
+        for (IActivityNode node : activity.getActivityNodes()) {
+            if (typeConverter.toEnum(node) == type) {
                 nodesOfType.add(new ActivityNode(node));
             }
         }
@@ -88,9 +88,9 @@ public class ActivityDiagramParser {
 
     public void deleteWhere(IActivity activity, DiagramEditor diagramEditor, ActivityNodeTypes type, String text) {
         for (ActivityNode node : this.findNodesOfType(activity, type)) {
-            if(node.text.equals(text)){
+            if (node.text.equals(text)) {
                 try {
-                    if(diagramEditor != null){
+                    if (diagramEditor != null) {
                         TransactionManager.beginTransaction();
                         diagramEditor.deletePresentation(node.presentation);
                         TransactionManager.endTransaction();
@@ -104,13 +104,13 @@ public class ActivityDiagramParser {
         }
     }
 
-    public void getScenarios(IActivity activity){
+    public List<NodeRoute> getScenarios(IActivity activity) {
         IActivityNode[] nodes = activity.getActivityNodes();
 
         ActivityNodeTreeBuilder activityNodeTreeBuilder = new ActivityNodeTreeBuilder(new NumberSeeder());
         ActivityNodeTree tree = activityNodeTreeBuilder.build(nodes[0]);
 
-        List<NodeRoute> routesToType = activityNodeTreeBuilder.getAllRoutesToType(tree.root, tree, ActivityNodeTypes.FINAL_NODE);
+        return activityNodeTreeBuilder.getAllRoutesToType(tree.root, tree, ActivityNodeTypes.FINAL_NODE);
     }
 }
 

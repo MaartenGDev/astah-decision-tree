@@ -10,13 +10,13 @@ public class InteractiveTable {
     private ButtonEditor buttonEditor;
     private ButtonRenderer buttonRenderer;
     private JTable table;
-    private boolean preventTableRefresh = true;
+    private boolean preventTableRefresh = false;
     private Object[][] data;
     private AbstractAction clickHandler;
-    private Object[] headers;
+    private Object[] columns;
 
-    public InteractiveTable(Object[] headers, Object[][] data,AbstractAction clickHandler) {
-        this.headers = headers;
+    public InteractiveTable(Object[] columns, Object[][] data,AbstractAction clickHandler) {
+        this.columns = columns;
         this.data = data;
         this.clickHandler = clickHandler;
     }
@@ -27,7 +27,7 @@ public class InteractiveTable {
     }
 
     public JTable buildTable() {
-        JTable table = new JTable(new DefaultTableModel(this.data, this.headers));
+        JTable table = new JTable(new DefaultTableModel(this.data, this.columns));
         table = addCellEditorAndRenderer(table);
 
         table.getColumn("Show").setCellRenderer(buttonRenderer);
@@ -57,12 +57,8 @@ public class InteractiveTable {
             return;
         }
 
-        ((DefaultTableModel) table.getModel()).setDataVector(data, this.headers);
+        ((DefaultTableModel) table.getModel()).setDataVector(data, this.columns);
         table = addCellEditorAndRenderer(table);
-    }
-
-    public void setHeaders(Object[] headers){
-        this.headers = headers;
     }
 
 

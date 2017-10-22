@@ -69,11 +69,11 @@ public class PathVisualizer {
     }
 
 
-    public void drawPathsOnRoute(NodeRoute route, Color color) {
+    public void drawPathsOnRoute(NodeRoute route, boolean isActive) {
         for (NodeConnection connection : route.route) {
             try {
                 TransactionManager.beginTransaction();
-                connection.line.setProperty("line.color", this.colorSeeder.getAsHexColor(color));
+                connection.line.setProperty("line.color", this.colorSeeder.getAsHexColor(isActive ? route.activeLineColor : Color.BLACK));
                 TransactionManager.endTransaction();
             } catch (InvalidEditingException e) {
                 TransactionManager.abortTransaction();
@@ -99,7 +99,7 @@ public class PathVisualizer {
                 diagramParser.deleteWhere(activity, diagramEditor, ActivityNodeTypes.CONNECTOR, String.valueOf(routeId));
             }
 
-            this.drawPathsOnRoute(route, isActive ? route.activeLineColor : Color.BLACK);
+            this.drawPathsOnRoute(route, isActive);
         }
 
         this.drawPathNumbers(diagramEditor, activeRoutes);
