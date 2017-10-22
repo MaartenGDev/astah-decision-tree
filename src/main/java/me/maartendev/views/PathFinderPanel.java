@@ -15,7 +15,6 @@ import java.awt.*;
 
 public class PathFinderPanel extends JPanel implements IPluginExtraTabView, ProjectEventListener {
 
-    private Container content;
     private PathFinderView pathFinderView;
 
     public PathFinderPanel() {
@@ -39,13 +38,12 @@ public class PathFinderPanel extends JPanel implements IPluginExtraTabView, Proj
     }
 
     private Container createLabelPane() {
-        content = pathFinderView.refreshContent();
-        return content;
+        return pathFinderView.loadContent();
     }
 
     @Override
     public void projectChanged(ProjectEvent e) {
-        pathFinderView.refreshTableContent();
+        pathFinderView.loadFreshTableData();
     }
 
     @Override

@@ -5,13 +5,11 @@ import com.change_vision.jude.api.inf.editor.DiagramEditor;
 import com.change_vision.jude.api.inf.editor.TransactionManager;
 import com.change_vision.jude.api.inf.exception.*;
 import com.change_vision.jude.api.inf.model.*;
-import com.change_vision.jude.api.inf.presentation.IPresentation;
 import me.maartendev.nodes.*;
 import me.maartendev.seeders.ColorSeeder;
 import me.maartendev.seeders.NumberSeeder;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 
@@ -106,22 +104,13 @@ public class ActivityDiagramParser {
         }
     }
 
-    private List<NodeConnection> getPathBetweenNodes(NodeConnection start, NodeConnection end, List<NodeConnection> initialConnections, List<NodeConnection> connections) {
+    public void getScenarios(IActivity activity){
+        IActivityNode[] nodes = activity.getActivityNodes();
 
-        NodeConnection targetConnection = initialConnections.stream().filter(x -> x.source.id.equals(start.source.id)).findFirst().get();
+        ActivityNodeTreeBuilder activityNodeTreeBuilder = new ActivityNodeTreeBuilder(new NumberSeeder());
+        ActivityNodeTree tree = activityNodeTreeBuilder.build(nodes[0]);
 
-        if (connections.size() == 0) {
-            connections.add(start);
-        }
-
-        connections.add(targetConnection);
-
-        if (targetConnection.destination.type == end.destination.type) {
-            return connections;
-        }
-
-
-        return getPathBetweenNodes(targetConnection, end, initialConnections, connections);
+        List<NodeRoute> routesToType = activityNodeTreeBuilder.getAllRoutesToType(tree.root, tree, ActivityNodeTypes.FINAL_NODE);
     }
 }
 

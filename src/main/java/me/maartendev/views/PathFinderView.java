@@ -3,6 +3,7 @@ package me.maartendev.views;
 import com.change_vision.jude.api.inf.editor.ActivityDiagramEditor;
 import com.change_vision.jude.api.inf.model.IActivity;
 import me.maartendev.datatransformers.NodeRouteDataTransformer;
+import me.maartendev.nodes.ActivityNodeTreeBuilder;
 import me.maartendev.nodes.NodeRoute;
 import me.maartendev.pathfinder.ActivityDiagramParser;
 import me.maartendev.pathfinder.PathVisualizer;
@@ -29,8 +30,9 @@ public class PathFinderView {
         this.pathVisualizer = new PathVisualizer(new ColorSeeder());
         this.projectManager = new ProjectManager();
 
-        this.testCaseTable = new InteractiveTable(projectManager, activityDiagramParser, nodeRouteDataTransformer, pathVisualizer, buildCellButtonClickHandler());
-        this.testCaseTable.setHeaders(new String[]{"Type", "Route Ids", "Count", "Show"});
+        this.testCaseTable = new InteractiveTable(new String[]{"Type", "Route Ids", "Count", "Show"}, getFreshTableData(), buildCellButtonClickHandler());
+
+
     }
 
     public void clearDiagramAnnotations() {
@@ -47,7 +49,7 @@ public class PathFinderView {
         return this.activityDiagramParser.getAllRoutes(activity);
     }
 
-    public Container refreshContent() {
+    public Container loadContent() {
         this.clearDiagramAnnotations();
 
         JPanel panel = new JPanel(new BorderLayout());
@@ -61,15 +63,18 @@ public class PathFinderView {
         panel.add(this.testCaseTable.getTable(), BorderLayout.CENTER);
 
         button.addActionListener(e -> {
-            this.clearDiagramAnnotations();
-            this.refreshTableContent();
+            this.activityDiagramParser.getScenarios(projectManager.getCurrentActivity());
         });
 
         return panel;
     }
 
-    public void refreshTableContent() {
-        this.testCaseTable.setTableData(this.nodeRouteDataTransformer.getAsObject(this.getCurrentRoutes()));
+    private Object[][] getFreshTableData(){
+        return this.nodeRouteDataTransformer.getAsObject(this.getCurrentRoutes());
+    }
+
+    public void loadFreshTableData() {
+        this.testCaseTable.setData(getFreshTableData());
     }
 
     private AbstractAction buildCellButtonClickHandler() {

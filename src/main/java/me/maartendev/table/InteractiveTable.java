@@ -1,48 +1,33 @@
 package me.maartendev.table;
 
-import com.change_vision.jude.api.inf.model.IActivity;
-import me.maartendev.datatransformers.NodeRouteDataTransformer;
-import me.maartendev.nodes.NodeRoute;
-import me.maartendev.pathfinder.ActivityDiagramParser;
-import me.maartendev.pathfinder.PathVisualizer;
-import me.maartendev.projects.ProjectManager;
-
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.util.List;
-import java.util.stream.Stream;
 
 public class InteractiveTable {
     private AbstractAction cellButtonClickHandler;
     private ButtonEditor buttonEditor;
     private ButtonRenderer buttonRenderer;
-    private JTable pathsTable;
+    private JTable table;
     private boolean preventTableRefresh = true;
-    private ProjectManager projectManager;
-    private ActivityDiagramParser activityDiagramParser;
-    private NodeRouteDataTransformer nodeRouteDataTransformer;
-    private PathVisualizer pathVisualizer;
+    private Object[][] data;
     private AbstractAction clickHandler;
     private Object[] headers;
 
-    public InteractiveTable(ProjectManager projectManager, ActivityDiagramParser activityDiagramParser, NodeRouteDataTransformer nodeRouteDataTransformer, PathVisualizer pathVisualizer, AbstractAction clickHandler) {
-        this.projectManager = projectManager;
-        this.activityDiagramParser = activityDiagramParser;
-        this.nodeRouteDataTransformer = nodeRouteDataTransformer;
-        this.pathVisualizer = pathVisualizer;
+    public InteractiveTable(Object[] headers, Object[][] data,AbstractAction clickHandler) {
+        this.headers = headers;
+        this.data = data;
         this.clickHandler = clickHandler;
-
-        this.pathsTable = this.buildTable();
     }
 
     public JTable getTable() {
-        return this.pathsTable;
+        if(this.table == null) table = this.buildTable();
+        return this.table;
     }
 
     public JTable buildTable() {
-        JTable table = new JTable(this.buildTableModel());
+        JTable table = new JTable(new DefaultTableModel(this.data, this.headers));
         table = addCellEditorAndRenderer(table);
 
         table.getColumn("Show").setCellRenderer(buttonRenderer);
@@ -55,13 +40,6 @@ public class InteractiveTable {
         return table;
     }
 
-    private DefaultTableModel buildTableModel() {
-        Object data[][] = this.nodeRouteDataTransformer.getAsObject(this.getCurrentRoutes());
-
-        Object columns[] = {"Type", "Route Ids", "Count", "Show"};
-
-        return new DefaultTableModel(data, columns);
-    }
 
     private JTable addCellEditorAndRenderer(JTable table) {
         if (cellButtonClickHandler == null) this.cellButtonClickHandler = buildCellButtonClickHandler();
@@ -74,23 +52,19 @@ public class InteractiveTable {
         return table;
     }
 
-    public void setTableData(Object[][] data) {
+    public void setData(Object[][] data) {
         if (preventTableRefresh) {
             return;
         }
 
-        ((DefaultTableModel) pathsTable.getModel()).setDataVector(data, this.headers);
+        ((DefaultTableModel) table.getModel()).setDataVector(data, this.headers);
+        table = addCellEditorAndRenderer(table);
     }
 
     public void setHeaders(Object[] headers){
         this.headers = headers;
     }
 
-    private List<NodeRoute> getCurrentRoutes() {
-        IActivity activity = this.projectManager.getCurrentActivity();
-
-        return activityDiagramParser.getAllRoutes(activity);
-    }
 
     private AbstractAction buildCellButtonClickHandler() {
         return new AbstractAction() {
