@@ -75,7 +75,7 @@ public class ActivityDiagramParser {
             }
 
             if (targetType == typeToFind) {
-                nodeRoutes.add(new NodeRoute(this.numberSeeder.getNext(), route.get(0).source, route.get(route.size() - 1).destination, route, this.colorSeeder.getNextColor()));
+                nodeRoutes.add(new NodeRoute(this.numberSeeder.getNext(), route.get(0).source, route.get(route.size() - 1).destination, route, this.colorSeeder.getNext()));
             } else if (typeToFind != ActivityNodeTypes.DECISION_NODE && targetType == ActivityNodeTypes.DECISION_NODE) {
                 return nodeRoutes;
             } else if (target.getOutgoings().length > 0) {
@@ -107,7 +107,7 @@ public class ActivityDiagramParser {
     public List<NodeRoute> getScenarios(IActivity activity) {
         IActivityNode[] nodes = activity.getActivityNodes();
 
-        ActivityNodeTreeBuilder activityNodeTreeBuilder = new ActivityNodeTreeBuilder(new NumberSeeder());
+        ActivityNodeTreeBuilder activityNodeTreeBuilder = new ActivityNodeTreeBuilder(new NumberSeeder(), new ColorSeeder());
         ActivityNodeTree tree = activityNodeTreeBuilder.build(nodes[0]);
 
         return activityNodeTreeBuilder.getAllRoutesToType(tree.root, tree, ActivityNodeTypes.FINAL_NODE);

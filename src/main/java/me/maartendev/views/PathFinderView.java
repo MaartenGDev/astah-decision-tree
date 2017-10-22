@@ -12,6 +12,9 @@ import me.maartendev.seeders.ColorSeeder;
 import me.maartendev.table.InteractiveTable;
 
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.List;
@@ -36,7 +39,7 @@ public class PathFinderView {
         this.projectManager = new ProjectManager();
 
         this.testCaseTable = new InteractiveTable(new String[]{"Type", "Route Ids", "Count", "Show"}, getFreshTableData(), buildCellButtonClickHandler());
-        this.scenariosTable = new InteractiveTable(new String[]{"Type", "Route Ids", "Show"}, getFreshScenariosTableData(), buildCellButtonClickHandler());
+        this.scenariosTable = new InteractiveTable(new String[]{"Type", "Route Ids", "Show"}, getFreshScenariosTableData(), buildCellButtonClickHandler2());
     }
 
     public void clearDiagramAnnotations() {
@@ -55,9 +58,11 @@ public class PathFinderView {
 
     public Container loadContent() {
         this.clearDiagramAnnotations();
-        JPanel panel = new JPanel(new GridLayout(0, 1));
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
         panel.add(new JScrollPane(this.testCaseTable.getTable()));
+        panel.add(new JLabel("-"));
         panel.add(new JScrollPane(this.scenariosTable.getTable()));
 
         return panel;
@@ -85,6 +90,25 @@ public class PathFinderView {
             public void actionPerformed(ActionEvent e) {
                 IActivity activity = projectManager.getCurrentActivity();
                 List<NodeRoute> routes = getCurrentRoutes();
+
+                JTable table = (JTable) e.getSource();
+
+                boolean hasToShowRoutes = Boolean.parseBoolean(e.getActionCommand());
+
+                String[] routeIdsAsStrings = table.getValueAt(table.getSelectedRow(), table.getColumn("Route Ids").getModelIndex()).toString().split(",");
+
+                int[] routeIds = Stream.of(routeIdsAsStrings).mapToInt(Integer::parseInt).toArray();
+
+                pathVisualizer.toggleRouteByIds(activity, projectManager.getCurrentDiagramEditor(), activityDiagramParser, routes, routeIds, hasToShowRoutes);
+            }
+        };
+    }
+
+    private AbstractAction buildCellButtonClickHandler2() {
+        return new AbstractAction() {
+            public void actionPerformed(ActionEvent e) {
+                IActivity activity = projectManager.getCurrentActivity();
+                List<NodeRoute> routes = activityDiagramParser.getScenarios(projectManager.getCurrentActivity());
 
                 JTable table = (JTable) e.getSource();
 

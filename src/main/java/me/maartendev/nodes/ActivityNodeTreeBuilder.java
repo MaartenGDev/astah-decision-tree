@@ -2,6 +2,7 @@ package me.maartendev.nodes;
 
 import com.change_vision.jude.api.inf.model.IActivityNode;
 import com.change_vision.jude.api.inf.model.IFlow;
+import me.maartendev.seeders.ColorSeeder;
 import me.maartendev.seeders.NumberSeeder;
 
 import java.util.ArrayList;
@@ -9,9 +10,11 @@ import java.util.List;
 
 public class ActivityNodeTreeBuilder {
     private NumberSeeder numberSeeder;
+    private ColorSeeder colorSeeder;
 
-    public ActivityNodeTreeBuilder(NumberSeeder numberSeeder) {
+    public ActivityNodeTreeBuilder(NumberSeeder numberSeeder, ColorSeeder colorSeeder) {
         this.numberSeeder = numberSeeder;
+        this.colorSeeder = colorSeeder;
     }
 
     public ActivityNodeTree build(IActivityNode activityNode) {
@@ -32,6 +35,7 @@ public class ActivityNodeTreeBuilder {
             ActivityNodeTree tree = new ActivityNodeTree();
 
             tree.root = new ActivityNode(flow.getTarget());
+            tree.root.setLine(flow);
 
             tree.children = getChildren(flow.getTarget());
 
@@ -52,10 +56,12 @@ public class ActivityNodeTreeBuilder {
         nodeRoute.source = initialNode;
 
         for (ActivityNodeTree node : nodeTree.children) {
-            nodeRoute.route.add(new NodeConnection(nodeTree.root, node.root, null));
+            nodeRoute.route.add(new NodeConnection(nodeTree.root, node.root, node.root.line));
 
             if (node.root.type == endType) {
                 nodeRoute.id = this.numberSeeder.getNext();
+                nodeRoute.activeLineColor = this.colorSeeder.getNext();
+
                 nodeRoute.destination = node.root;
                 nodeRoutes.add(new NodeRoute(nodeRoute));
                 nodeRoute.route = new ArrayList<>();

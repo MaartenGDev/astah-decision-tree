@@ -12,7 +12,7 @@ public class ColorSeeder {
         };
     }
 
-    public Color getNextColor(){
+    public Color getNext(){
         Color color = this.colors[colorIndex];
         this.colorIndex++;
         return color;
