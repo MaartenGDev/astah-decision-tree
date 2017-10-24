@@ -17,6 +17,7 @@ public class ActivityNode {
     public Rectangle2D location;
     public String text;
     public IPresentation line;
+    public IActivityNode state;
 
 
     public ActivityNode(IActivityNode node) {
@@ -27,6 +28,7 @@ public class ActivityNode {
         location = getNodeLocation(node);
         presentation = getPresentation(node);
         text = node.getName();
+        state = node;
     }
 
     public void setLine(IFlow flow){
