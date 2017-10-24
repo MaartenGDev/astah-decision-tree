@@ -25,12 +25,12 @@ public class ActivityNodeTreeBuilder {
 
     private ActivityNodeTree getTree(IActivityNode activityNode, ActivityNodeTree rootTree) {
         rootTree.root = new ActivityNode(activityNode);
-        rootTree.children.addAll(getChildren(new ActivityNode(activityNode), activityNode.getOutgoings(), new ArrayList<>(), new ArrayList<>()));
+        rootTree.children.addAll(getChildren(new ActivityNode(activityNode), activityNode.getOutgoings(), new ArrayList<>()));
 
         return rootTree;
     }
 
-    private List<ActivityNodeTree> getChildren(ActivityNode node, IFlow[] possibleDirections, List<NodeConnection> visitedConnections, List<String> loopedDecisionIds) {
+    private List<ActivityNodeTree> getChildren(ActivityNode node, IFlow[] possibleDirections, List<NodeConnection> visitedConnections) {
         List<ActivityNodeTree> trees = new ArrayList<>();
 
         for (IFlow flow : possibleDirections) {
@@ -46,9 +46,9 @@ public class ActivityNodeTreeBuilder {
             tree.root = rootNode;
             tree.root.setLine(flow);
 
-            IFlow[] possibleFLows = convertToArray(Arrays.stream(target.getOutgoings()).filter(x -> rootNode.type != ActivityNodeTypes.DECISION_NODE || !hasConnectedToSelf(rootNode, visitedConnections, new NodeConnection(rootNode, new ActivityNode(x.getTarget()), null), true)).collect(Collectors.toList()));
+            IFlow[] possibleFlows = convertToArray(Arrays.stream(target.getOutgoings()).filter(x -> rootNode.type != ActivityNodeTypes.DECISION_NODE || !hasConnectedToSelf(rootNode, visitedConnections, new NodeConnection(rootNode, new ActivityNode(x.getTarget()), null), true)).collect(Collectors.toList()));
 
-            tree.children = getChildren(rootNode, possibleFLows, visitedConnections, loopedDecisionIds);
+            tree.children = getChildren(rootNode, possibleFlows, visitedConnections);
 
             trees.add(tree);
         }

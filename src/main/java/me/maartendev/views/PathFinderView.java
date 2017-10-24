@@ -38,8 +38,8 @@ public class PathFinderView {
         this.pathVisualizer = new PathVisualizer(new ColorSeeder());
         this.projectManager = new ProjectManager();
 
-        this.testCaseTable = new InteractiveTable(new String[]{"Type", "Route Ids", "Count", "Show"}, getFreshTableData(), buildCellButtonClickHandler());
-        this.scenariosTable = new InteractiveTable(new String[]{"Type", "Route Ids", "Show"}, getFreshScenariosTableData(), buildCellButtonClickHandler2());
+        this.testCaseTable = new InteractiveTable(new String[]{"Type", "Route Ids", "Count", "Show"}, getFreshTableData(), buildTestCaseTableButtonClickHandler());
+        this.scenariosTable = new InteractiveTable(new String[]{"Type", "Route Ids", "Show"}, getFreshScenariosTableData(), buildScenariosTableButtonClickHandler());
     }
 
     public void clearDiagramAnnotations() {
@@ -85,7 +85,7 @@ public class PathFinderView {
         this.scenariosTable.setData(getFreshScenariosTableData());
     }
 
-    private AbstractAction buildCellButtonClickHandler() {
+    private AbstractAction buildTestCaseTableButtonClickHandler() {
         return new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
                 IActivity activity = projectManager.getCurrentActivity();
@@ -104,7 +104,7 @@ public class PathFinderView {
         };
     }
 
-    private AbstractAction buildCellButtonClickHandler2() {
+    private AbstractAction buildScenariosTableButtonClickHandler() {
         return new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
                 IActivity activity = projectManager.getCurrentActivity();

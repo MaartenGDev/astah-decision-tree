@@ -102,7 +102,7 @@ public class PathVisualizer {
             this.drawPathsOnRoute(route, isActive);
         }
 
-        this.drawPathNumbers(diagramEditor, activeRoutes);
+     //   this.drawPathNumbers(diagramEditor, activeRoutes);
     }
 
 }
